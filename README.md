@@ -1,1 +1,3 @@
-# MaxwellFDTD.jl
+# MaxwellFDTD
+
+

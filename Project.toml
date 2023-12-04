@@ -1,0 +1,4 @@
+name = "MaxwellFDTD"
+uuid = "05e3fcd6-9284-11ee-281d-adfd411b2232"
+authors = ["Gioele Molinari gioelemo@ethz.ch"]
+version = "0.1.0"
