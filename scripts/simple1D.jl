@@ -11,46 +11,69 @@ using Plots
 plot_font = "Computer Modern"
 default(fontfamily=plot_font, framestyle=:box, label=true, grid=true, labelfontsize=11, tickfontsize=11, titlefontsize=13)
 
+@parallel_indices (i) function update_H_y!(H_y, E_z, imp0)
+    # for i in 1:nx-1
+    #     H_y[i] = H_y[i] + (E_z[i+1] - E_z[i]) / imp0
+    # end
+    
+    n = length(H_y)
+    if i < n
+        H_y[i] = H_y[i] + (E_z[i+1] - E_z[i]) / imp0
+    end
+    
+    return nothing
+end
+
+@parallel_indices (i) function update_E_z!(H_y, E_z, imp0)
+    # for i in 2:nx-1
+    # E_z[i] = E_z[i] + (H_y[i] - H_y[i-1]) * imp0   
+    # end
+
+    n = length(H_y)
+    if i > 1
+         E_z[i] = E_z[i] + (H_y[i] - H_y[i-1]) * imp0
+    end
+
+    return nothing
+end
+
+
 function FDTD_1D(; do_visu=false)
     # Physics
     imp0 = 377.0
 
     # numerics
     nx = 200
-    nt = 1000
-    nvis = 50
+    nt = 250
+    nvis = 1
 
-    # init
+    # initialize fields
+    E_z = @zeros(nx + 1)
+    H_y = @zeros(nx + 1)
 
-    E_z = @zeros(nx)
-    H_y = @zeros(nx)
-
-    E_z_values = @zeros(nt)
+    #E_z_values = @zeros(nt)
 
     # time stepping
     for it in 1:nt
 
         # update magnetic field
-        for i in 1:nx-1
-            H_y[i] = H_y[i] + (E_z[i+1] - E_z[i]) / imp0
-        end
+        @parallel update_H_y!(H_y, E_z, imp0)
 
         # update electric field
-        for i in 2:nx-1
-            E_z[i] = E_z[i] + (H_y[i] - H_y[i-1]) * imp0
-        end
+        @parallel update_E_z!(H_y, E_z, imp0)
 
-        # source
+        # point source
         E_z[1] = exp(-(it-30.0)^2 / 100.0)
 
+        # visualization
         if do_visu && (it % nvis == 0)
             p1 = plot(E_z, label="E_z", title="E_z at t=$it")
-            p2 = plot(H_y, label="H_y")
+            #p2 = plot(H_y, label="H_y")
             display(p1)
-            sleep(0.5)
+            #sleep(0.5)
         end
 
-        E_z_values[it] = E_z[50]
+        #E_z_values[it] = E_z[50]
         
     end
 
