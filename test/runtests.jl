@@ -1,6 +1,6 @@
-using PorousConvection
+using MaxwellFDTD
 using Test
 
-@testset "PorousConvection.jl" begin
+@testset "MaxwellFDTD.jl" begin
     # Write your tests here.
 end
