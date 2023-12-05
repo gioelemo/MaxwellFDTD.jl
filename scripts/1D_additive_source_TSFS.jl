@@ -24,14 +24,14 @@ default(fontfamily=plot_font, framestyle=:box, label=true, grid=true, labelfonts
     return nothing
 end
 
-@parallel_indices (i) function update_E_z!(H_y, E_z, imp0)
+@parallel_indices (i) function update_E_z!(H_y, E_z, epsR, imp0)
     # for i in 2:nx-1
-    # E_z[i] = E_z[i] + (H_y[i] - H_y[i-1]) * imp0   
+    # E_z[i] = E_z[i] + (H_y[i] - H_y[i-1]) * imp0/epsR[i]   
     # end
 
     n = length(H_y)
     if i > 1
-         E_z[i] = E_z[i] + (H_y[i] - H_y[i-1]) * imp0
+         E_z[i] = E_z[i] + (H_y[i] - H_y[i-1]) * imp0 / epsR[i]
     end
 
     return nothing
@@ -49,13 +49,20 @@ function FDTD_1D(; do_visu=false)
 
     # initialize fields
     E_z = @zeros(nx + 1)
+    #H_y = @zeros(nx + 1)
     H_y = @zeros(nx + 1)
+    epsR = @zeros(nx + 1)
+
+    epsR = [i < 100 ? 1.0 : 9.0 for i in 1:nx+1]
+
+    println(size(epsR))
+
 
     # time stepping
     for it in 1:nt
         
         # absorbing boundary conditions on H_y
-        H_y[end] = H_y[end-1]
+        #H_y[end] = H_y[end-1]
 
         # update magnetic field
         @parallel update_H_y!(H_y, E_z, imp0)
@@ -65,9 +72,10 @@ function FDTD_1D(; do_visu=false)
 
         # absorbing boundary conditions on E_z
         E_z[1] = E_z[2]
+        E_z[end] = E_z[end-1]
 
         # update electric field
-        @parallel update_E_z!(H_y, E_z, imp0)
+        @parallel update_E_z!(H_y, E_z, epsR, imp0)
 
         # correction E_z
         E_z[50] = E_z[50] + exp(- (it + 0.5 - (-0.5) - 30.0)^2 / 100.0)
