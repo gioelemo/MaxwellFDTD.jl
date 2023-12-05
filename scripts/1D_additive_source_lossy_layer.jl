@@ -6,108 +6,104 @@ using ParallelStencil.FiniteDifferences1D
 else
     @init_parallel_stencil(Threads, Float64, 1, inbounds=true)
 end
-using Plots
+using Plots, LaTeXStrings
 
 plot_font = "Computer Modern"
 default(fontfamily=plot_font, framestyle=:box, label=true, grid=true, labelfontsize=11, tickfontsize=11, titlefontsize=13)
 
 @parallel_indices (i) function update_H_y!(H_y, E_z, H_y_e_loss, H_y_h_loss)
-    
     n = length(H_y)
     if i < n
         H_y[i] = H_y_h_loss[i] * H_y[i] + H_y_e_loss[i] * (E_z[i+1] - E_z[i]) 
     end
-    
     return nothing
 end
 
-@parallel_indices (i) function update_E_z!(H_y, E_z, E_z_e_loss, E_z_h_loss)
-    
+@parallel_indices (i) function update_E_z!(H_y, E_z, E_z_e_loss, E_z_h_loss) 
     if i > 1
          E_z[i] = E_z_e_loss[i] * E_z[i] + E_z_h_loss[i] * (H_y[i] - H_y[i-1])
     end
-
     return nothing
 end
 
+@parallel_indices (i) function update_E_z_loss_coeff!(E_z_e_loss, E_z_h_loss, imp0, loss, loss_layer_index)
+    if i < 100
+        E_z_e_loss[i] = 1.0
+        E_z_h_loss[i] = imp0
+    elseif i < loss_layer_index
+        E_z_e_loss[i] = 1.0
+        E_z_h_loss[i] = imp0 / 9.0
+    else
+        E_z_e_loss[i] = (1.0 - loss) / (1.0 + loss)
+        E_z_h_loss[i] = imp0 / 9.0  / (1.0 + loss)
+    end
+    return nothing
+end
 
+@parallel_indices (i) function update_H_y_loss_coeff!(H_y_e_loss, H_y_h_loss, imp0, loss, loss_layer_index)
+    if i < loss_layer_index
+        H_y_h_loss[i] = 1.0
+        H_y_e_loss[i] = 1.0 / imp0
+    else
+        H_y_h_loss[i] = (1.0 - loss) / (1.0 + loss)
+        H_y_e_loss[i] = 1.0 / imp0 / (1.0 + loss)
+    end
+    return nothing
+end
+    
 function FDTD_1D(; do_visu=false)
     # Physics
-    imp0 = 377.0
-    loss = 0.02
-    loss_layer_index = 180
+    imp0 = 377.0            # free space impedance
+    loss = 0.02             # loss factor
+    loss_layer_index = 180  # loss layer index
 
-    # numerics
-    nx = 200
-    nt = 450
-    nvis = 10
+    # Numerics
+    nx = 200                # number of cells
+    nt = 450                # number of time steps
+    nvis = 10               # visualization interval
+    Cdt_ds = 1.0            # Courant number
 
-    # initialize fields
+    # Electric and Magnetic field initialization
     E_z = @zeros(nx + 1)
     H_y = @zeros(nx + 1)
-    epsR = @zeros(nx + 1)
 
-    # add inomogeneous medium
-    epsR = [i < 100 ? 1.0 : 9.0 for i in 1:nx+1]
-
-    # lossy coefficient arrays
+    # Lossy coefficient arrays initialization
     E_z_e_loss = @zeros(nx + 1)
     E_z_h_loss = @zeros(nx + 1)
     H_y_e_loss = @zeros(nx + 1)
     H_y_h_loss = @zeros(nx + 1)
 
-    #E_z_loss = [i < 100 ? 1.0 : (1.0 - loss) / (1.0 + loss)  for i in 1:nx+1]
-    #H_y_loss = [i < 100 ? imp0 : imp0 / 9.0  / (1.0 + loss)  for i in 1:nx+1]
+    # Update E_z and H_y loss coefficients
+    @parallel update_E_z_loss_coeff!(E_z_e_loss, E_z_h_loss, imp0, loss, loss_layer_index)
+    @parallel update_H_y_loss_coeff!(H_y_e_loss, H_y_h_loss, imp0, loss, loss_layer_index)
 
-    for i in 1:nx+1
-        if i < 100
-            E_z_e_loss[i] = 1.0
-            E_z_h_loss[i] = imp0
-        elseif i < loss_layer_index
-            E_z_e_loss[i] = 1.0
-            E_z_h_loss[i] = imp0 / 9.0
-        else
-            E_z_e_loss[i] = (1.0 - loss) / (1.0 + loss)
-            E_z_h_loss[i] = imp0 / 9.0  / (1.0 + loss)
-        end
-    end
-    for i in 1:nx+1
-        if i < loss_layer_index
-            H_y_h_loss[i] = 1.0
-            H_y_e_loss[i] = 1.0 / imp0
-        else
-            H_y_h_loss[i] = (1.0 - loss) / (1.0 + loss)
-            H_y_e_loss[i] = 1.0 / imp0 / (1.0 + loss)
-        end
-        
-    end
-
-    # time stepping
+    # Time stepping
     for it in 1:nt
         
-        # absorbing boundary conditions on H_y
+        # Absorbing boundary conditions on H_y
         #H_y[end] = H_y[end-1]
 
-        # update magnetic field
+        # Update magnetic field
         @parallel update_H_y!(H_y, E_z, H_y_e_loss, H_y_h_loss)
 
-        # correcting H_y
+        # Correcting H_y
         H_y[49] = H_y[49] - exp(-(it - 30.0)^2 / 100.0) / imp0 
 
-        # absorbing boundary conditions on E_z
+        # Absorbing boundary conditions on E_z
         E_z[1] = E_z[2]
 
-        # update electric field
+        # Update electric field
         @parallel update_E_z!(H_y, E_z, E_z_e_loss, E_z_h_loss)
 
-        # correction E_z
+        # Correction E_z
         E_z[50] = E_z[50] + exp(- (it + 0.5 - (-0.5) - 30.0)^2 / 100.0)
 
+        # Utility to save figures
         save_file = false
 
         # visualization
         if do_visu && (it % nvis == 0)
-            p1 = plot(E_z, label="E_z", title="E_z at t=$it", ylims=(-1.0, 1.0))
+            p1 = plot(E_z, label=L"$E_z$", title="\$E_z\$ at it=$it", ylims=(-1.0, 1.0))
             # p2 = plot(H_y, label="H_y")
             # plot!(H_y, label="H_y")
             display(p1)
