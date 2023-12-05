@@ -11,20 +11,20 @@ using Plots
 plot_font = "Computer Modern"
 default(fontfamily=plot_font, framestyle=:box, label=true, grid=true, labelfontsize=11, tickfontsize=11, titlefontsize=13)
 
-@parallel_indices (i) function update_H_y!(H_y, E_z, imp0)
+@parallel_indices (i) function update_H_y!(H_y, E_z, H_y_e_loss, H_y_h_loss)
     
     n = length(H_y)
     if i < n
-        H_y[i] = H_y[i] + (E_z[i+1] - E_z[i]) / imp0
+        H_y[i] = H_y_h_loss[i] * H_y[i] + H_y_e_loss[i] * (E_z[i+1] - E_z[i]) 
     end
     
     return nothing
 end
 
-@parallel_indices (i) function update_E_z!(H_y, E_z, E_z_loss, H_y_loss)
+@parallel_indices (i) function update_E_z!(H_y, E_z, E_z_e_loss, E_z_h_loss)
     
     if i > 1
-         E_z[i] = E_z_loss[i] * E_z[i] + H_y_loss[i] * (H_y[i] - H_y[i-1])
+         E_z[i] = E_z_e_loss[i] * E_z[i] + E_z_h_loss[i] * (H_y[i] - H_y[i-1])
     end
 
     return nothing
@@ -51,31 +51,33 @@ function FDTD_1D(; do_visu=false)
     epsR = [i < 100 ? 1.0 : 9.0 for i in 1:nx+1]
 
     # lossy coefficient arrays
-    E_z_loss = @zeros(nx + 1)
-    H_y_loss = @zeros(nx + 1)
+    E_z_e_loss = @zeros(nx + 1)
+    E_z_h_loss = @zeros(nx + 1)
+    H_y_e_loss = @zeros(nx + 1)
+    H_y_h_loss = @zeros(nx + 1)
 
     #E_z_loss = [i < 100 ? 1.0 : (1.0 - loss) / (1.0 + loss)  for i in 1:nx+1]
     #H_y_loss = [i < 100 ? imp0 : imp0 / 9.0  / (1.0 + loss)  for i in 1:nx+1]
 
     for i in 1:nx+1
         if i < 100
-            E_z_loss[i] = 1.0
-            H_y_loss[i] = imp0
-        else if i < loss_layer_index
-            E_z_loss[i] = 1.0
-            H_y_loss[i] = imp0 / 9.0
+            E_z_e_loss[i] = 1.0
+            E_z_h_loss[i] = imp0
+        elseif i < loss_layer_index
+            E_z_e_loss[i] = 1.0
+            E_z_h_loss[i] = imp0 / 9.0
         else
-            E_z_loss[i] = (1.0 - loss) / (1.0 + loss)
-            H_y_loss[i] = imp0 / 9.0  / (1.0 + loss)
+            E_z_e_loss[i] = (1.0 - loss) / (1.0 + loss)
+            E_z_h_loss[i] = imp0 / 9.0  / (1.0 + loss)
         end
     end
     for i in 1:nx+1
         if i < loss_layer_index
-            H_y_loss[i] = 1.0
-            E_z_loss[i] = 1.0 / imp0
+            H_y_h_loss[i] = 1.0
+            H_y_e_loss[i] = 1.0 / imp0
         else
-            H_y_loss[i] = (1.0 - loss) / (1.0 + loss)
-            E_z_loss[i] = 1.0 / imp0 / (1.0 + loss)
+            H_y_h_loss[i] = (1.0 - loss) / (1.0 + loss)
+            H_y_e_loss[i] = 1.0 / imp0 / (1.0 + loss)
         end
         
     end
@@ -87,7 +89,7 @@ function FDTD_1D(; do_visu=false)
         #H_y[end] = H_y[end-1]
 
         # update magnetic field
-        @parallel update_H_y!(H_y, E_z, imp0)
+        @parallel update_H_y!(H_y, E_z, H_y_e_loss, H_y_h_loss)
 
         # correcting H_y
         H_y[49] = H_y[49] - exp(-(it - 30.0)^2 / 100.0) / imp0 
@@ -96,7 +98,7 @@ function FDTD_1D(; do_visu=false)
         E_z[1] = E_z[2]
 
         # update electric field
-        @parallel update_E_z!(H_y, E_z, E_z_loss, H_y_loss)
+        @parallel update_E_z!(H_y, E_z, E_z_e_loss, E_z_h_loss)
 
         # correction E_z
         E_z[50] = E_z[50] + exp(- (it + 0.5 - (-0.5) - 30.0)^2 / 100.0)
