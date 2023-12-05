@@ -50,6 +50,10 @@ end
     end
     return nothing
 end
+
+function correct_E_z(it, Cdt_ds, width, delay, location)
+    return exp(-(it + delay - (-delay) - location / Cdt_ds)^2 / width)
+end
     
 function FDTD_1D(; do_visu=false)
     # Physics
@@ -86,7 +90,7 @@ function FDTD_1D(; do_visu=false)
         # Update magnetic field
         @parallel update_H_y!(H_y, E_z, H_y_e_loss, H_y_h_loss)
 
-        # Correcting H_y
+        # Correction H_y
         H_y[49] = H_y[49] - exp(-(it - 30.0)^2 / 100.0) / imp0 
 
         # Absorbing boundary conditions on E_z
@@ -96,7 +100,8 @@ function FDTD_1D(; do_visu=false)
         @parallel update_E_z!(H_y, E_z, E_z_e_loss, E_z_h_loss)
 
         # Correction E_z
-        E_z[50] = E_z[50] + exp(- (it + 0.5 - (-0.5) - 30.0)^2 / 100.0)
+        correction_E_z = correct_E_z(it, Cdt_ds, 100.0, 0.5, 30.0)
+        E_z[50] = E_z[50] + correction_E_z
 
         # Utility to save figures
         save_file = false
@@ -105,8 +110,8 @@ function FDTD_1D(; do_visu=false)
         if do_visu && (it % nvis == 0)
             p1 = plot(E_z, label=L"$E_z$", title="\$E_z\$ at it=$it", ylims=(-1.0, 1.0))
             p2 = plot(H_y, label=L"$H_y$", title="\$H_y\$ at it=$it", ylims=(-0.05, 0.05))
-            #display(p1)
-            display(p2)
+            display(p1)
+            #display(p2)
 
             if (it == 100 || it == 140 || it == 190) && save_file == true
                 savefig(p1, "1D_additive_source_TSFS_$it.png")
