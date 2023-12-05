@@ -67,7 +67,7 @@ function FDTD_1D(; do_visu=false)
 
         # visualization
         if do_visu && (it % nvis == 0)
-            p1 = plot(E_z, label="E_z", title="E_z at t=$it", ylims=(0.0, 1.0))
+            p1 = plot(E_z, label="E_z", title="E_z at t=$it", ylims=(-1.0, 1.0))
             # p2 = plot(H_y, label="H_y")
             display(p1)
 
