@@ -55,9 +55,15 @@ function FDTD_1D(; do_visu=false)
 
     # time stepping
     for it in 1:nt
+        
+        # absorbing boundary conditions on H_y
+        H_y[end] = H_y[end-1]
 
         # update magnetic field
         @parallel update_H_y!(H_y, E_z, imp0)
+
+        # absorbing boundary conditions on E_z
+        E_z[1] = E_z[2]
 
         # update electric field
         @parallel update_E_z!(H_y, E_z, imp0)
