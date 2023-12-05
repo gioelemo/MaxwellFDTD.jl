@@ -8,8 +8,6 @@ else
 end
 using Plots
 
-include("plotting.jl")
-
 plot_font = "Computer Modern"
 default(fontfamily=plot_font, framestyle=:box, label=true, grid=true, labelfontsize=11, tickfontsize=11, titlefontsize=13)
 
@@ -62,19 +60,23 @@ function FDTD_1D(; do_visu=false)
         # update magnetic field
         @parallel update_H_y!(H_y, E_z, imp0)
 
+        # correcting H_y
+        H_y[49] = H_y[49] - exp(-(it - 30.0)^2 / 100.0) / imp0 
+
         # absorbing boundary conditions on E_z
         E_z[1] = E_z[2]
 
         # update electric field
         @parallel update_E_z!(H_y, E_z, imp0)
 
-        # point source
-        E_z[51] = exp(-(it-30.0)^2 / 100.0)
+        # correction E_z
+        E_z[50] = E_z[50] + exp(- (it + 0.5 - (-0.5) - 30.0)^2 / 100.0)
 
         # visualization
         if do_visu && (it % nvis == 0)
             p1 = plot(E_z, label="E_z", title="E_z at t=$it", ylims=(-1.0, 1.0))
             # p2 = plot(H_y, label="H_y")
+            # plot!(H_y, label="H_y")
             display(p1)
 
             sleep(0.5)
