@@ -104,9 +104,9 @@ function FDTD_1D(; do_visu=false)
         # visualization
         if do_visu && (it % nvis == 0)
             p1 = plot(E_z, label=L"$E_z$", title="\$E_z\$ at it=$it", ylims=(-1.0, 1.0))
-            # p2 = plot(H_y, label="H_y")
-            # plot!(H_y, label="H_y")
-            display(p1)
+            p2 = plot(H_y, label=L"$H_y$", title="\$H_y\$ at it=$it", ylims=(-0.05, 0.05))
+            #display(p1)
+            display(p2)
 
             if (it == 100 || it == 140 || it == 190) && save_file == true
                 savefig(p1, "1D_additive_source_TSFS_$it.png")
