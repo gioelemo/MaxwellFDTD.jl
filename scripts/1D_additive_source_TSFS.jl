@@ -53,9 +53,8 @@ function FDTD_1D(; do_visu=false)
     H_y = @zeros(nx + 1)
     epsR = @zeros(nx + 1)
 
+    # add inomogeneous medium
     epsR = [i < 100 ? 1.0 : 9.0 for i in 1:nx+1]
-
-    println(size(epsR))
 
 
     # time stepping
@@ -80,12 +79,18 @@ function FDTD_1D(; do_visu=false)
         # correction E_z
         E_z[50] = E_z[50] + exp(- (it + 0.5 - (-0.5) - 30.0)^2 / 100.0)
 
+        save_file = false
+
         # visualization
         if do_visu && (it % nvis == 0)
             p1 = plot(E_z, label="E_z", title="E_z at t=$it", ylims=(-1.0, 1.0))
             # p2 = plot(H_y, label="H_y")
             # plot!(H_y, label="H_y")
             display(p1)
+
+            if (it == 100 || it == 140) && save_file == true
+                savefig(p1, "1D_additive_source_TSFS_$it.png")
+            end
 
             sleep(0.5)
         end
