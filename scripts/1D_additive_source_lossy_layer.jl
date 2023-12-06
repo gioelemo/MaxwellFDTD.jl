@@ -54,6 +54,11 @@ end
 function correct_E_z(it, Cdt_ds, width, delay, location)
     return exp(-(it + delay - (-delay) - location / Cdt_ds)^2 / width)
 end
+
+function ABC_bc(E_z)
+    E_z[1] = E_z[2]
+    return nothing
+end
     
 function FDTD_1D(; do_visu=false)
     # Physics
@@ -62,12 +67,15 @@ function FDTD_1D(; do_visu=false)
     loss_layer_index = 180  # loss layer index
     interface_index = 100   # interface index between free space and dielectric
     epsR = 9.0              # relative permittivity
+    TSFS_boundary = 50      # TSFS boundary
 
     # Numerics
     nx = 200                # number of cells
     nt = 450                # number of time steps
     nvis = 10               # visualization interval
     Cdt_ds = 1.0            # Courant number
+    width = 100.0           # width of the Gaussian pulse
+    location = 30.0         # location of the Gaussian pulse
 
     # Electric and Magnetic field initialization
     E_z = @zeros(nx + 1)
@@ -93,17 +101,18 @@ function FDTD_1D(; do_visu=false)
         @parallel update_H_y!(H_y, E_z, H_y_e_loss, H_y_h_loss)
 
         # Correction H_y
-        H_y[49] = H_y[49] - exp(-(it - 30.0)^2 / 100.0) / imp0 
+        correct_H_y = correct_E_z(it, Cdt_ds, width, 0.0, location)
+        H_y[TSFS_boundary] -= correct_H_y * H_y_e_loss[TSFS_boundary]
 
-        # Absorbing boundary conditions on E_z
-        E_z[1] = E_z[2]
+        # Absorbing boundary conditions on E_z (only left side)
+        ABC_bc(E_z)
 
         # Update electric field
         @parallel update_E_z!(H_y, E_z, E_z_e_loss, E_z_h_loss)
 
         # Correction E_z
-        correction_E_z = correct_E_z(it, Cdt_ds, 100.0, 0.5, 30.0)
-        E_z[50] = E_z[50] + correction_E_z
+        correction_E_z = correct_E_z(it, Cdt_ds, width, 0.5, location)
+        E_z[TSFS_boundary + 1] += correction_E_z
 
         # Utility to save figures
         save_file = false
