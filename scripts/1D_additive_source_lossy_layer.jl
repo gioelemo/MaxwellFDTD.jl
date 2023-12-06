@@ -51,8 +51,8 @@ end
     return nothing
 end
 
-function correct_E_z(it, Cdt_ds, width, delay, location)
-    return exp(-(it + delay - (-delay) - location / Cdt_ds)^2 / width)
+function correct_E_z(it, Cdt_dx, width, delay, location)
+    return exp(-(it + delay - (-delay) - location / Cdt_dx)^2 / width)
 end
 
 function ABC_bc(E_z)
@@ -73,7 +73,7 @@ function FDTD_1D(; do_visu=false)
     nx = 200                # number of cells
     nt = 450                # number of time steps
     nvis = 10               # visualization interval
-    Cdt_ds = 1.0            # Courant number
+    Cdt_dx = 1.0            # Courant number c * dt/dx
     width = 100.0           # width of the Gaussian pulse
     location = 30.0         # location of the Gaussian pulse
 
@@ -101,7 +101,7 @@ function FDTD_1D(; do_visu=false)
         @parallel update_H_y!(H_y, E_z, H_y_e_loss, H_y_h_loss)
 
         # Correction H_y
-        correct_H_y = correct_E_z(it, Cdt_ds, width, 0.0, location)
+        correct_H_y = correct_E_z(it, Cdt_dx, width, 0.0, location)
         H_y[TSFS_boundary] -= correct_H_y * H_y_e_loss[TSFS_boundary]
 
         # Absorbing boundary conditions on E_z (only left side)
@@ -111,7 +111,7 @@ function FDTD_1D(; do_visu=false)
         @parallel update_E_z!(H_y, E_z, E_z_e_loss, E_z_h_loss)
 
         # Correction E_z
-        correction_E_z = correct_E_z(it, Cdt_ds, width, 0.5, location)
+        correction_E_z = correct_E_z(it, Cdt_dx, width, 0.5, location)
         E_z[TSFS_boundary + 1] += correction_E_z
 
         # Utility to save figures
