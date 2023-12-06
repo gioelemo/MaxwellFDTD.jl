@@ -26,16 +26,16 @@ end
     return nothing
 end
 
-@parallel_indices (i) function update_E_z_loss_coeff!(E_z_e_loss, E_z_h_loss, imp0, loss, interface_index, loss_layer_index)
+@parallel_indices (i) function update_E_z_loss_coeff!(E_z_e_loss, E_z_h_loss, imp0, loss, interface_index, loss_layer_index, epsR)
     if i < interface_index
         E_z_e_loss[i] = 1.0
         E_z_h_loss[i] = imp0
     elseif i < loss_layer_index
         E_z_e_loss[i] = 1.0
-        E_z_h_loss[i] = imp0 / 9.0
+        E_z_h_loss[i] = imp0 / epsR
     else
         E_z_e_loss[i] = (1.0 - loss) / (1.0 + loss)
-        E_z_h_loss[i] = imp0 / 9.0  / (1.0 + loss)
+        E_z_h_loss[i] = imp0 / epsR  / (1.0 + loss)
     end
     return nothing
 end
@@ -61,6 +61,7 @@ function FDTD_1D(; do_visu=false)
     loss = 0.02             # loss factor
     loss_layer_index = 180  # loss layer index
     interface_index = 100   # interface index between free space and dielectric
+    epsR = 9.0              # relative permittivity
 
     # Numerics
     nx = 200                # number of cells
@@ -79,7 +80,7 @@ function FDTD_1D(; do_visu=false)
     H_y_h_loss = @zeros(nx + 1)
 
     # Update E_z and H_y loss coefficients
-    @parallel update_E_z_loss_coeff!(E_z_e_loss, E_z_h_loss, imp0, loss, interface_index, loss_layer_index)
+    @parallel update_E_z_loss_coeff!(E_z_e_loss, E_z_h_loss, imp0, loss, interface_index, loss_layer_index, epsR)
     @parallel update_H_y_loss_coeff!(H_y_e_loss, H_y_h_loss, imp0, loss, loss_layer_index)
 
     # Time stepping
@@ -108,23 +109,18 @@ function FDTD_1D(; do_visu=false)
         save_file = false
 
         # Color palette
-        c1 = colorant"red"
-        c2 = colorant"green"
-       
-        #colors = distinguishable_colors(5)
-        #colors = range(c1, stop=c2, length=5)
         colors = ColorSchemes.davos10.colors
+
         # visualization
         if do_visu && (it % nvis == 0)
             p1 = plot(E_z, label=L"$E_z$", title="\$E_z\$ at it=$it", ylims=(-1.0, 1.0), xlims=(0,nx), legend=:topright)
             
-            vspan!([0, interface_index], color=colors[1], alpha=0.2, label="")
-            vspan!([interface_index, loss_layer_index], color=colors[4], alpha=0.2, label="")
-            vspan!([loss_layer_index, nx], color=colors[6], alpha=0.2, label="")
+            vspan!([0, interface_index], color=colors[4], alpha=0.2, label="")
+            vspan!([interface_index, loss_layer_index], color=colors[6], alpha=0.2, label="")
+            vspan!([loss_layer_index, nx], color=colors[8], alpha=0.2, label="")
             
-
             vline!([interface_index], color=colors[2], linestyle=:dash, label="Interface free space - dielectric")
-            vline!([loss_layer_index], color=colors[1], linestyle=:dash, label="Lossy layer index")
+            vline!([loss_layer_index], color=colors[1], linestyle=:dashdot, label="Lossy layer index")
             
             display(p1)
 
