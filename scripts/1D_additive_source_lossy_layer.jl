@@ -116,7 +116,7 @@ function FDTD_1D(; do_visu=false)
         colors = ColorSchemes.davos10.colors
         # visualization
         if do_visu && (it % nvis == 0)
-            p1 = plot(E_z, label=L"$E_z$", title="\$E_z\$ at it=$it", ylims=(-1.0, 1.0), legend=:topright)
+            p1 = plot(E_z, label=L"$E_z$", title="\$E_z\$ at it=$it", ylims=(-1.0, 1.0), xlims=(0,nx), legend=:topright)
             
             vspan!([0, interface_index], color=colors[1], alpha=0.2, label="")
             vspan!([interface_index, loss_layer_index], color=colors[4], alpha=0.2, label="")
