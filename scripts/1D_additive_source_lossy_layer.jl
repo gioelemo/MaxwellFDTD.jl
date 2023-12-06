@@ -6,7 +6,7 @@ using ParallelStencil.FiniteDifferences1D
 else
     @init_parallel_stencil(Threads, Float64, 1, inbounds=true)
 end
-using Plots, LaTeXStrings
+using Plots, LaTeXStrings, Colors, ColorSchemes
 
 plot_font = "Computer Modern"
 default(fontfamily=plot_font, framestyle=:box, label=true, grid=true, labelfontsize=11, tickfontsize=11, titlefontsize=13)
@@ -26,8 +26,8 @@ end
     return nothing
 end
 
-@parallel_indices (i) function update_E_z_loss_coeff!(E_z_e_loss, E_z_h_loss, imp0, loss, loss_layer_index)
-    if i < 100
+@parallel_indices (i) function update_E_z_loss_coeff!(E_z_e_loss, E_z_h_loss, imp0, loss, interface_index, loss_layer_index)
+    if i < interface_index
         E_z_e_loss[i] = 1.0
         E_z_h_loss[i] = imp0
     elseif i < loss_layer_index
@@ -60,6 +60,7 @@ function FDTD_1D(; do_visu=false)
     imp0 = 377.0            # free space impedance
     loss = 0.02             # loss factor
     loss_layer_index = 180  # loss layer index
+    interface_index = 100   # interface index between free space and dielectric
 
     # Numerics
     nx = 200                # number of cells
@@ -78,7 +79,7 @@ function FDTD_1D(; do_visu=false)
     H_y_h_loss = @zeros(nx + 1)
 
     # Update E_z and H_y loss coefficients
-    @parallel update_E_z_loss_coeff!(E_z_e_loss, E_z_h_loss, imp0, loss, loss_layer_index)
+    @parallel update_E_z_loss_coeff!(E_z_e_loss, E_z_h_loss, imp0, loss, interface_index, loss_layer_index)
     @parallel update_H_y_loss_coeff!(H_y_e_loss, H_y_h_loss, imp0, loss, loss_layer_index)
 
     # Time stepping
@@ -106,11 +107,28 @@ function FDTD_1D(; do_visu=false)
         # Utility to save figures
         save_file = false
 
+        # Color palette
+        c1 = colorant"red"
+        c2 = colorant"green"
+       
+        #colors = distinguishable_colors(5)
+        #colors = range(c1, stop=c2, length=5)
+        colors = ColorSchemes.davos10.colors
         # visualization
         if do_visu && (it % nvis == 0)
             p1 = plot(E_z, label=L"$E_z$", title="\$E_z\$ at it=$it", ylims=(-1.0, 1.0))
-            p2 = plot(H_y, label=L"$H_y$", title="\$H_y\$ at it=$it", ylims=(-0.05, 0.05))
+            
+            vspan!([0, interface_index], color=colors[1], alpha=0.2, label="")
+            vspan!([interface_index, loss_layer_index], color=colors[4], alpha=0.2, label="")
+            vspan!([loss_layer_index, nx], color=colors[6], alpha=0.2, label="")
+            
+
+            vline!([interface_index], color=colors[2], linestyle=:dash, label="Interface free space - dielectric")
+            vline!([loss_layer_index], color=colors[1], linestyle=:dash, label="Lossy layer index")
+            
             display(p1)
+
+            #p2 = plot(H_y, label=L"$H_y$", title="\$H_y\$ at it=$it", ylims=(-0.05, 0.05))
             #display(p2)
 
             if (it == 100 || it == 140 || it == 190) && save_file == true
