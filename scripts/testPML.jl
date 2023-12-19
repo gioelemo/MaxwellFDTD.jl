@@ -80,7 +80,7 @@ function ABC_bc(E_z)
     E_z[1] = E_z[2]
     return nothing
 end
-    
+
 function FDTD_1D(; bc="exp", do_visu=false)
     # Physics
     imp0 = 377.0                        # free space impedance
@@ -134,6 +134,13 @@ function FDTD_1D(; bc="exp", do_visu=false)
         @parallel update_H_y_loss_coeff2!(H_y_e_loss, H_y_h_loss, imp0, loss, loss_layer_index)
     end
 
+    # PML parameters
+    sigma_max = 1.0  # Maximum conductivity
+    PML_thickness = 5  # Number of cells in the PML layer
+    
+
+
+
     # Time stepping
     for it in 1:nt
         
@@ -152,7 +159,8 @@ function FDTD_1D(; bc="exp", do_visu=false)
         H_y[TSFS_boundary] -= correct_H_y * H_y_e_loss[TSFS_boundary]
 
         # Absorbing boundary conditions on E_z (only left side)
-        ABC_bc(E_z)
+        PML_bc(E_z, sigma_max, PML_thickness)
+        println(sigma_max[1])
 
         # Update electric field
         @parallel update_E_z!(H_y, E_z, E_z_e_loss, E_z_h_loss)
@@ -167,7 +175,7 @@ function FDTD_1D(; bc="exp", do_visu=false)
         E_z[TSFS_boundary + 1] += correction_E_z
 
         # Utility to save figures
-        save_file = false
+        save_file = true
 
         # Color palette
         colors = ColorSchemes.davos10.colors
@@ -188,11 +196,11 @@ function FDTD_1D(; bc="exp", do_visu=false)
             #p2 = plot(H_y, label=L"$H_y$", title="\$H_y\$ at it=$it", ylims=(-0.05, 0.05))
             #display(p2)
 
-            if save_file == true
+            if save_file == true && it == nt
                 savefig(p1, "./docs/1D_additive_source_TSFS_$it.png")
             end
 
-            sleep(0.2)
+            #sleep(0.2)
         end
 
         if bc == "sin"
@@ -205,6 +213,7 @@ function FDTD_1D(; bc="exp", do_visu=false)
 
     end
 
+
     if bc == "sin"
         p3 = plot(max_E_z, label=L"$E_z$", title="Maximum \$E_z\$ across all iterations", ylims=(0.0, 1.5), xlims=(0,nx), legend=:topright, dpi=300)
         savefig(p3, "./docs/1D_additive_source_TSFS_max_E_z.png")
@@ -213,5 +222,5 @@ function FDTD_1D(; bc="exp", do_visu=false)
     return
 end
 
-FDTD_1D(do_visu=true, bc="exp")
-#FDTD_1D(do_visu=true, bc="sin")
+#FDTD_1D(do_visu=true, bc="exp")
+FDTD_1D(do_visu=true, bc="sin")
