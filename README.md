@@ -66,10 +66,12 @@ TODO: Explain formulas in 1D + results
 
 The update equations in 1D are given as:
 
-$\begin{aligned}
+$$
+\begin{align}
 \mu \frac{\partial H_y}{\partial t} &= \frac{\partial E_z}{\partial x} \\
 \epsilon \frac{\partial E_z}{\partial t} &= \frac{\partial H_y}{\partial x}
-\end{aligned}$
+\end{align}
+$$
 
 ## 2D FTDT
 
@@ -79,19 +81,23 @@ The update equations in 1D are given as:
 
 
 ### $TM^z$
-$\begin{aligned}
+$$
+\begin{align}
 -\sigma_m H_x - \mu \frac{\partial H_x}{\partial t} &= \frac{\partial E_z}{\partial y} \\
 \sigma_m H_y + \mu \frac{\partial H_y}{\partial t} &= \frac{\partial E_z}{\partial x} \\
 \sigma E_z + \epsilon \frac{\partial E_z}{\partial t} &= \frac{\partial H_y}{\partial x} -\frac{\partial H_x}{\partial y}
-\end{aligned}$
+\end{align}
+$$
 
 ### $TE^z$
 
-$\begin{aligned}
+$$
+\begin{align}
 \sigma E_x + \epsilon \frac{\partial E_x}{\partial t} &= \frac{\partial H_z}{\partial y} \\
 \sigma E_y + \epsilon \frac{\partial E_y}{\partial t} &= -\frac{\partial H_z}{\partial x} \\
 -\sigma_m H_z - \mu\frac{\partial H_z}{\partial t} &= \frac{\partial E_y}{\partial x} - \frac{\partial E_x}{\partial y}
-\end{aligned}$
+\end{align}
+$$
 
 ## 3D FTDT
 
