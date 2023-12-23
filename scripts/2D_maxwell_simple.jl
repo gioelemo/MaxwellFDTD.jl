@@ -22,7 +22,7 @@ using Plots
         Ex[:, 2:end-1] .+= dt / ε0 .* (-σ .* Ex[:, 2:end-1] .+ diff(Hz, dims=2) ./ dy)
         Ey[2:end-1, :] .+= dt / ε0 .* (-σ .* Ey[2:end-1, :] .- diff(Hz, dims=1) ./ dx)
         Hz .+= dt / μ0 .* (-σ .* Hz .+ diff(Ex, dims=2) ./ dy .- diff(Ey, dims=1) ./ dx)
-        (it % nout == 0) && display(heatmap(Hz'))
+        (it % nout == 0) && display(heatmap(Hz', color=:turbo, aspect_ratio=:equal, xlims=(0, nx), ylims=(0, ny), legend=false))
     end
     return
 end
