@@ -7,7 +7,7 @@ else
     @init_parallel_stencil(Threads, Float64, 2, inbounds=true)
 end
 
-using Printf, Plots
+using Printf, Plots, JLD
 plot_font = "Computer Modern"
 default(fontfamily=plot_font, framestyle=:box, label=true, grid=true, labelfontsize=11, tickfontsize=11, titlefontsize=13)
 
@@ -56,7 +56,7 @@ end
     return nothing
 end
     
-@views function maxwell()
+@views function maxwell(ny_, nt_, nvis_; do_visu=false, do_check=true, do_test=true)
     # physics
     lx, ly = 40.0, 40.0
     ε0 = 1.0
@@ -64,11 +64,11 @@ end
     σ = 1.0
     
     # numerics
-    nx, ny = 100, 101
+    nx, ny = ny_ - 1, ny_
 
     # PML parameters
     pml_width = 10
-    pml_alpha = 0
+    pml_alpha = 0.25
      
     # Extend the grid
     nx_pml, ny_pml = nx + 2 * pml_width, ny + 2 * pml_width
@@ -77,8 +77,8 @@ end
     dx, dy = lx / nx_pml, ly / ny_pml
     xc, yc = LinRange(-lx / 2 + dx / 2, lx / 2 - dx / 2, nx_pml), LinRange(-ly / 2 + dy / 2, ly / 2 - dy / 2, ny_pml)
     dt = min(dx, dy)^2 / (1 / ε0 / μ0) / 4.1
-    nt = 1e3
-    nout = 1e2
+    nt = nt_
+    nout = nvis_
 
     # initial conditions
     Ex = @zeros(nx_pml, ny_pml + 1)
@@ -87,7 +87,6 @@ end
     Hz = Data.Array(exp.(.-xc .^ 2 .- yc' .^ 2))
 
     # visualisation for cluster
-    do_visu = true
     if do_visu
         # plotting environment
         ENV["GKSwstype"]="nul"
@@ -110,7 +109,7 @@ end
         # Update H
         @parallel update_Hz!(Hz, Ex, Ey, σ, μ0, dt, dy, dx)
         
-        if it % nout == 0
+        if it % nout == 0 && do_visu == true
             # Create a heatmap
             plt = heatmap(Array(Hz'), aspect_ratio=:equal, xlims=(1, nx_pml), ylims=(1, ny_pml), c=:turbo, title="H_z field", dpi=300)
 
@@ -125,7 +124,20 @@ end
             # display(plt)
         end
     end
-    return
+
+    # testing
+    if do_test == true
+        if USE_GPU
+            save("../test/ref_Hz_2D_gpu.jld", "data", Hz)         # store case for reference testing
+        else
+            save("../test/ref_Hz_2D_cpu.jld", "data", Hz)         # store case for reference testing
+        end
+    end
+
+    return Array(Hz)
 end
 
-maxwell()
+# ny, nt, nvis
+#maxwell(101, 1000, 100; do_visu=false, do_test=true)
+
+#maxwell(50, 10, 10; do_visu=false, do_test=true)
