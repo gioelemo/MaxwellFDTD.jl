@@ -7,7 +7,7 @@ else
     @init_parallel_stencil(Threads, Float64, 2, inbounds=true)
 end
 
-using Plots
+using Printf, Plots
 plot_font = "Computer Modern"
 default(fontfamily=plot_font, framestyle=:box, label=true, grid=true, labelfontsize=11, tickfontsize=11, titlefontsize=13)
 
@@ -23,17 +23,29 @@ end
     return nothing
 end
 
-@parallel_indices (i) function update_PML!(pml_width, pml_alpha, Ex, Ey)
+@parallel_indices (i,j) function update_PML_x!(pml_width, pml_alpha, Ex)
     # for i in 1:pml_width
     #     Ex[i, :] .= exp(-(pml_width - i) * pml_alpha) .* Ex[i, :]
     #     Ex[end - i + 1, :] .= exp(-(pml_width - i) * pml_alpha) .* Ex[end - i + 1, :]
     #     Ey[:, i] .= exp(-(pml_width - i) * pml_alpha) .* Ey[:, i]
     #     Ey[:, end - i + 1] .= exp(-(pml_width - i) * pml_alpha) .* Ey[:, end - i + 1]
     # end
-    Ex[i, :] .= exp(-(pml_width - i) * pml_alpha) .* Ex[i, :]
-    Ex[end - i + 1, :] .= exp(-(pml_width - i) * pml_alpha) .* Ex[end - i + 1, :]
-    Ey[:, i] .= exp(-(pml_width - i) * pml_alpha) .* Ey[:, i]
-    Ey[:, end - i + 1] .= exp(-(pml_width - i) * pml_alpha) .* Ey[:, end - i + 1]
+    Ex[i, j] = exp(-(pml_width - i) * pml_alpha) * Ex[i, j]
+    Ex[end - i + 1, j] = exp(-(pml_width - i) * pml_alpha) * Ex[end - i + 1, j]
+
+    return nothing
+end
+
+@parallel_indices (i,j) function update_PML_y!(pml_width, pml_alpha, Ey)
+    # for i in 1:pml_width
+    #     Ex[i, :] .= exp(-(pml_width - i) * pml_alpha) .* Ex[i, :]
+    #     Ex[end - i + 1, :] .= exp(-(pml_width - i) * pml_alpha) .* Ex[end - i + 1, :]
+    #     Ey[:, i] .= exp(-(pml_width - i) * pml_alpha) .* Ey[:, i]
+    #     Ey[:, end - i + 1] .= exp(-(pml_width - i) * pml_alpha) .* Ey[:, end - i + 1]
+    # end
+
+    Ey[j, i] = exp(-(pml_width - i) * pml_alpha) * Ey[j, i]
+    Ey[j, end - i + 1] = exp(-(pml_width - i) * pml_alpha) * Ey[j, end - i + 1]
 
     return nothing
 end
@@ -44,7 +56,6 @@ end
     return nothing
 end
     
-
 @views function maxwell()
     # physics
     lx, ly = 40.0, 40.0
@@ -75,35 +86,43 @@ end
     Hz = @zeros(nx_pml, ny_pml)
     Hz = Data.Array(exp.(.-xc .^ 2 .- yc' .^ 2))
 
+    # visualisation for cluster
+    do_visu = true
+    if do_visu
+        # plotting environment
+        ENV["GKSwstype"]="nul"
+        if isdir("../docs/viz_out")==false mkdir("../docs/viz_out") end
+        loadpath = "../docs/viz_out/"; anim = Animation(loadpath,String[])
+        println("Animation directory: $(anim.dir)")
+        iframe = 0
+    end
+
+    # timestepping
     for it in 1:nt
         # Update E
         @parallel update_Ex!(Ex, Hz, σ, ε0, dt, dy)
         @parallel update_Ey!(Ey, Hz, σ, ε0, dt, dx)
 
         # Update PML
-        @parallel (1:pml_width) update_PML!(pml_width, pml_alpha, Ex, Ey)
-        
+        @parallel (1:pml_width, 1:size(Ex, 2)) update_PML_x!(pml_width, pml_alpha, Ex)
+        @parallel (1:pml_width, 1:size(Ey, 1)) update_PML_y!(pml_width, pml_alpha, Ey)
+
         # Update H
         @parallel update_Hz!(Hz, Ex, Ey, σ, μ0, dt, dy, dx)
         
-        # Save the final field
-        save_end_ez = false
-       
         if it % nout == 0
             # Create a heatmap
-            plt = heatmap(Hz', aspect_ratio=:equal, xlims=(1, nx_pml), ylims=(1, ny_pml), c=:turbo, title="H_z field")
+            plt = heatmap(Array(Hz'), aspect_ratio=:equal, xlims=(1, nx_pml), ylims=(1, ny_pml), c=:turbo, title="H_z field", dpi=300)
 
             # Add a rectangle to represent the PML layer
             rect_x = [pml_width, nx_pml-pml_width+1, nx_pml-pml_width+1, pml_width, pml_width ]
             rect_y = [pml_width, pml_width, ny_pml-pml_width+1, nx_pml-pml_width+1, pml_width]
             plot!(plt, rect_x, rect_y, line=:black, linewidth=2, fillalpha=0, legend=false)
+
+            png(plt, @sprintf("../docs/viz_out/maxwell2D_%04d.png",iframe+=1))
             
-            # Save the figure
-            if it ==nt && save_end_ez==true
-                savefig(plt, "maxwell_pml.png")
-            end
-            # Display the plot
-            display(plt)
+            # Display the plot (work only local)
+            # display(plt)
         end
     end
     return
