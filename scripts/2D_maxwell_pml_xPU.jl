@@ -1,4 +1,4 @@
-const USE_GPU = true
+const USE_GPU = false
 using ParallelStencil
 using ParallelStencil.FiniteDifferences2D
 @static if USE_GPU
@@ -140,8 +140,8 @@ end
 # ny, nt, nvis
 #maxwell(101, 1000, 100; do_visu=false, do_test=true)
 
-#maxwell(50, 10, 10; do_visu=false, do_test=true)
+#maxwell(50, 10, 10, 0.25; do_visu=false, do_test=true)
 
 #maxwell(256, 15000, 100, 0.0; do_visu=true, do_test=false)
-maxwell(256, 15000, 100, 5.0; do_visu=true, do_test=false)
-maxwell(256, 15000, 100, 0.1; do_visu=true, do_test=false)
+#maxwell(256, 15000, 100, 5.0; do_visu=true, do_test=false)
+#maxwell(256, 15000, 100, 0.1; do_visu=true, do_test=false)
