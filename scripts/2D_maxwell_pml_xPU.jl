@@ -111,7 +111,7 @@ end
         
         if it % nout == 0 && do_visu == true
             # Create a heatmap
-            plt = heatmap(Array(Hz'), aspect_ratio=:equal, xlims=(1, nx_pml), ylims=(1, ny_pml), c=:turbo, title="\$H_z\$ at it=$it", dpi=300)
+            plt = heatmap(Array(Hz'), aspect_ratio=:equal, xlims=(1, nx_pml), ylims=(1, ny_pml), c=:turbo, title="\$H_z\$ at it=$it")
 
             # Add a rectangle to represent the PML layer
             rect_x = [pml_width, nx_pml-pml_width+1, nx_pml-pml_width+1, pml_width, pml_width ]
@@ -142,4 +142,6 @@ end
 
 #maxwell(50, 10, 10; do_visu=false, do_test=true)
 
-maxwell(256, 15000, 50, 0.0; do_visu=true, do_test=false)
+#maxwell(256, 15000, 100, 0.0; do_visu=true, do_test=false)
+maxwell(256, 15000, 100, 5.0; do_visu=true, do_test=false)
+maxwell(256, 15000, 100, 0.1; do_visu=true, do_test=false)

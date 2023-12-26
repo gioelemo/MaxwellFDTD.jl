@@ -99,10 +99,12 @@ $$
 \end{align}
 $$
 
-We have the following two animations:
-![](./docs/Maxwell_2D_xpu_alpha0.00.gif)
+We have the following three animations:
+![](./docs/Maxwell_2D_xpu_alpha=000.gif)
 
-![](./docs/Maxwell_2D_xpu_alpha0.75.gif)
+![](./docs/Maxwell_2D_xpu_alpha=010.gif)
+
+![](./docs/Maxwell_2D_xpu_alpha=500.gif)
 
 ## 3D FTDT
 
