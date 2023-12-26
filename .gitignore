@@ -1,2 +1,5 @@
 .DS_Store
 Manifest.toml
+.o
+.e
+/docs/viz_out
