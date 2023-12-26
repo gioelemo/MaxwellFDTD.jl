@@ -99,6 +99,11 @@ $$
 \end{align}
 $$
 
+We have the following two animations:
+![](./docs/Maxwell_2D_xpu_alpha0.00.gif)
+
+![](./docs/Maxwell_2D_xpu_alpha0.75.gif)
+
 ## 3D FTDT
 
 TODO: Explain formulas in 3D + results

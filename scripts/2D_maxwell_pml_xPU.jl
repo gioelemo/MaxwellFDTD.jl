@@ -1,4 +1,4 @@
-const USE_GPU = false
+const USE_GPU = true
 using ParallelStencil
 using ParallelStencil.FiniteDifferences2D
 @static if USE_GPU
@@ -56,7 +56,7 @@ end
     return nothing
 end
     
-@views function maxwell(ny_, nt_, nvis_; do_visu=false, do_check=true, do_test=true)
+@views function maxwell(ny_, nt_, nvis_, pml_alpha_; do_visu=false, do_check=true, do_test=true)
     # physics
     lx, ly = 40.0, 40.0
     ε0 = 1.0
@@ -67,8 +67,8 @@ end
     nx, ny = ny_ - 1, ny_
 
     # PML parameters
-    pml_width = 10
-    pml_alpha = 0.25
+    pml_width = 50
+    pml_alpha = pml_alpha_
      
     # Extend the grid
     nx_pml, ny_pml = nx + 2 * pml_width, ny + 2 * pml_width
@@ -111,7 +111,7 @@ end
         
         if it % nout == 0 && do_visu == true
             # Create a heatmap
-            plt = heatmap(Array(Hz'), aspect_ratio=:equal, xlims=(1, nx_pml), ylims=(1, ny_pml), c=:turbo, title="H_z field", dpi=300)
+            plt = heatmap(Array(Hz'), aspect_ratio=:equal, xlims=(1, nx_pml), ylims=(1, ny_pml), c=:turbo, title="\$H_z\$ at it=$it", dpi=300)
 
             # Add a rectangle to represent the PML layer
             rect_x = [pml_width, nx_pml-pml_width+1, nx_pml-pml_width+1, pml_width, pml_width ]
@@ -141,3 +141,5 @@ end
 #maxwell(101, 1000, 100; do_visu=false, do_test=true)
 
 #maxwell(50, 10, 10; do_visu=false, do_test=true)
+
+maxwell(256, 15000, 50, 0.0; do_visu=true, do_test=false)
