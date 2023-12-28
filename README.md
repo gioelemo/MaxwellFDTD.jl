@@ -12,16 +12,16 @@
     -  [Mathematical Formulation](#mathematical-formulation-1)
     -  [Code](#code)
 - [2D FDTD](#2d-fdtd)
+    -  [Mathematical Formulation](#mathematical-formulation-2)
+     -  [Code](#code-1)
 - [3D FDTD](#3d-fdtd)
+    -  [Mathematical Formulation](#mathematical-formulation-3)
+    -  [Code](#code-2)
 - [Testing](#testing)
 - [Results and conclusions](#results-and-conclusions)
 - [References](#references)
 
-TODO: Control table of contents as a list
-
 ## Introduction
-
-TODO: Describe the problem, libraries used and gpu/cpu
 
 This repository hosts the implementation of a Maxwell equations solver using the Finite Differences Time Domain (FDTD) method in the Julia programming language, utilizing the  [ParallelStencil.jl](https://github.com/omlins/ParallelStencil.jl) and [ImplicitGlobalGrid.jl](https://github.com/eth-cscs/ImplicitGlobalGrid.jl) packages. 
 
@@ -31,7 +31,20 @@ All tests were conducted locally on a MacBook Pro 2017 - 2.8 GHz Intel Core i7 q
 
 ## Setup
 
-TODO: Explain how to run the code
+The code can be run directly on Julia REPL by installing all the packages listed in [Project.toml](Project.toml) file. 
+
+```julia
+]
+activate .
+```
+
+Most of the scripts come with a `shell` script which can be use in a SLURM cluster environment with the command
+
+```bash
+sbatch run_"name_of_program"_xPU.sh
+```
+
+All of the provided scripts can be run on CPU or GPU (and some of them on multiple xPUs).
 
 ## Mathematical formulation
 
@@ -150,11 +163,9 @@ We can use the following update equations when working with integer indexes and 
 
 where `imp0` is the characteristic impedance of free space (approximately 377 $\Omega$).
 
-
-
 In this code is also additionally implemented:
 
-1. Additive source in an explicit point of the domain (i.e. at the TSFS boundary). This source can be a Gaussian function (with specified width and location) or a sinusoidal function. This is done in the `correct_E_z()` and  `correct_E_z2()` functions. 
+1. Additive source in an explicit point of the domain (i.e. at the TSFS boundary). This source can be a Gaussian function (with specified width and location) or a sinusoidal function. This is done in the `correct_E_z()` functions. 
 
 2. A Total-Field/Scattered-Field (TFSF) Boundary which separate the total field into incident and scattered components, allowing for accurate characterization of the scattered electromagnetic waves in the vicinity of the simulation domain.
 
@@ -165,6 +176,7 @@ In this code is also additionally implemented:
 5. A lossy region where some loss is introduced (controlled by the `loss_layer_index` , `epsR` and `loss` variables).
 
 We first run the code for the Gaussian source case with the following parameters:
+
 ```julia
 nx   = 200    # number space steps
 nt   = 450    # number timesteps
@@ -180,6 +192,7 @@ Cdt_dx   = 1.0   # Courant's number
 width    = 100.0 # width of  Gaussian pulse
 location = 30.0  # location of Gaussian pulse
 ```
+
 After running the code with 
 `sbatch run_1D_maxwell_lossy_layer_xPU.sh` (works for both CPU and GPU by changing the `USE_GPU` flag in the [1D_maxwell_additive_source_lossy_layer.jl](./scripts/1D_maxwell_additive_source_lossy_layer.jl) file.) we get the following animation for the $E_z$ field
 
@@ -192,6 +205,7 @@ As we can see the additive source is added at the TSFS boundary (at index 50). T
 It is also possible to observe that at the left part of the computational domain, the wave is not reflected. This is due to the use of Absorbing Boundary Conditions (ABC).
 
 Similar as before we can run the code with a sin source with the following parameters:
+
 ```julia
 nx   = 200    # number space steps
 nt   = 450    # number timesteps
@@ -219,13 +233,13 @@ As in the previous example, we can also see here that the additive source is add
 Also here, tt is possible to observe that at the left part of the computational domain, the wave is not reflected. This is due to the use of Absorbing Boundary Conditions (ABC).
 
 
-
 ## 2D FDTD
 
+### Mathematical Formulation
 TODO: Explain formulas in 2D + results
 
 The update equations in 1D are given as:
-
+### Code
 
 ### $TM^z$
 $$
@@ -255,11 +269,17 @@ We have the following three animations:
 
 ## 3D FDTD
 
-TODO: Explain formulas in 3D + results
+### Mathematical Formulation
+
+TODO: Explain formulas in 3D 
+
+### Code
+
+TODO: results
 
 ## Testing
 
-TODO: Explain what tests are performed
+For all implementations (1D, 2D, 3D) we perform some unit and reference testing. For more details of the testing we refer directly to the test files [test_1D](./test/test1D.jl), [test_2D](./test/test2D.jl), [test_3D](./test/test3D.jl)
 
 ## Results and conclusions
 
@@ -276,7 +296,3 @@ TODO: Write some conclusion and to what extent the code can be extended
 
 [4] Berenger, Jean-Pierre. "A perfectly matched layer for the absorption of electromagnetic waves." Journal of computational physics 114.2 (1994): 185-200 (also [here](./references/APerfectlyMatchedLayerfortheAbsorptionofElectromagneticWaves.pdf))
 
-
-
-
-TODO: Complete the list with useful references
