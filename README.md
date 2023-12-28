@@ -94,6 +94,7 @@ $$
 \epsilon \frac{\partial E_z}{\partial t} &= \frac{\partial H_y}{\partial x} \tag{6}
 \end{align*}
 $$
+
 We can then transform the previous two equation using a finite difference approach as follow:
 
 1. For $H_y$:
