@@ -9,6 +9,8 @@
 - [Mathematical formulation](#mathematical-formulation)
 - [Numerical Methods](#numerical-methods)
 - [1D FDTD](#1d-fdtd)
+    -  [Mathematical Formulation](#mathematical-formulation-1)
+    -  [Code](#code)
 - [2D FDTD](#2d-fdtd)
 - [3D FDTD](#3d-fdtd)
 - [Testing](#testing)
@@ -64,6 +66,7 @@ The finite-difference equations derived from this process are addressed in a lea
 ## 1D FDTD
 The goal of this section is to provide a simple code for a Finite Difference Time domain simulator for solving a simple version of the Maxwell equations in 1D.
 
+### Mathematical Formulation
 We assume in this case that the electric field only has a $z$ component.
 
 In this case Faraday's law (Equation 1) can be written as:
@@ -132,8 +135,11 @@ where:
 
 - $H_y^{q+\frac{1}{2}}\left[m-\frac{1}{2}\right]$: Magnetic field component $H_y$ at the half-integer spatial position $m-\frac{1}{2}$ and time step $q+\frac{1}{2}$.
 
-We define the Courant number $S_c$ as
+We can additionally define the Courant number $S_c$ as
 $$S_c := \frac{c \Delta_t}{\Delta_x}$$
+
+### Code
+The method of the previous subsection is implemented in the [1D_additive_source_lossy_layer.jl](./scripts/1D_additive_source_lossy_layer.jl) file.
 
 We can use the following update equations when working with integer indexes and assuming that $S_c=1$:
 
@@ -144,7 +150,7 @@ We can use the following update equations when working with integer indexes and 
 
 where `imp0` is the characteristic impedance of free space (approximately 377 $\Omega$).
 
-This method is implemented in the [1D_additive_source_lossy_layer.jl](./scripts/1D_additive_source_lossy_layer.jl) file.
+
 
 In this code is also additionally implemented:
 
@@ -157,6 +163,41 @@ In this code is also additionally implemented:
 4. An interface index between free space and dielectric space (controlled by the `interface_index` parameter) 
 
 5. A lossy region where some loss is introduced (controlled by the `loss_layer_index` , `epsR` and `loss` variables).
+
+We first run the code for the Gaussian source case with the following parameters:
+```julia
+nx   = 200    # number space steps
+nt   = 450    # number timesteps
+nvis = 10     # interval visualisation
+src  = "exp"  # Gaussian source
+imp0 = 377.0  # free space impedance
+loss = 0.02   # loss factor
+interface_index = 100  # interface index between free space-dielectric
+epsR = 9.0    # relative permittivity
+loss_layer_index     = 180   # loss layer index
+TSFS_boundary_index  = 50    # TSFS index
+Cdt_dx   = 1.0   # Courant's number
+width    = 100.0 # width of  Gaussian pulse
+location = 30.0  # location of Gaussian pulse
+```
+After running the code with 
+`sbatch run_1D_maxwell_lossy_layer_xPU.sh` (works for both CPU and GPU by changing the `USE_GPU` flag in the [1D_additive_source_lossy_layer.jl](./scripts/1D_additive_source_lossy_layer.jl) file.) we get the following animation for the $E_z$ field
+
+|![](./docs/Maxwell_1D_xpu_exp.gif)|
+|:--:| 
+| *Maxwell FDTD 1D simulation nx=200, nt=450 - $E_z$ field* |
+
+As we can see the additive source is added at the TSFS boundary (at index 50). The "wave" is then propagated until the interface between the free-space and the dielectric region (at index 100) where one part get reflected and the other part continues into the dielectric region. At the lossy layer index (at index 180) we start to introduce loss in the simulation, this the magnitude of the wave start to decrease. 
+
+It is also possible to observe that at the left part of the computational domain, the wave is not reflected. This is due to the use of Absorbing Boundary Conditions (ABC).
+
+
+
+TODO sin example
+![](./docs/Maxwell_1D_xpu_sin.gif)
+
+
+
 
 
 ## 2D FDTD

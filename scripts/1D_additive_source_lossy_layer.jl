@@ -180,10 +180,9 @@ function FDTD_1D(nx_, nt_, nvis_; src="exp", do_visu=false, do_test=false)
         loss             = 0.0253146    # loss factor
         interface_index  = 100          # interface index between free space and dielectric
         epsR             = 4.0          # relative permittivity
-        #loss_layer_index = 100          # loss layer index
         N_lambda         = 40.0         # number of points per wavelengths
     end
-    TSFS_boundary_index  = 50          # TSFS boundary
+    TSFS_boundary_index  = 50          # TSFS boundary index
     
     # Numerics
     nx     = nx_                # number of cells
