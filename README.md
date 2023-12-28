@@ -261,11 +261,17 @@ $$
 $$
 
 We have the following three animations:
-![](./docs/Maxwell_2D_xpu_alpha=000.gif)
+|![](./docs/Maxwell_2D_xpu_alpha=000.gif)|
+|:--:|
+| *Maxwell FDTD 2D simulation nx=.., ny, ..., nt=450 - Hz field, alpha=.0* |
 
-![](./docs/Maxwell_2D_xpu_alpha=010.gif)
+|![](./docs/Maxwell_2D_xpu_alpha=010.gif)|
+|:--:|
+| *Maxwell FDTD 2D simulation nx=.., ny, ..., nt=450 - Hz field, alpha=.0.1* |
 
-![](./docs/Maxwell_2D_xpu_alpha=500.gif)
+|![](./docs/Maxwell_2D_xpu_alpha=500.gif)|
+|:--:|
+| *Maxwell FDTD 2D simulation nx=.., ny, ..., nt=450 - Hz field, alpha=.5* |
 
 ## 3D FDTD
 
