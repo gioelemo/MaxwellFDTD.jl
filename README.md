@@ -185,7 +185,7 @@ After running the code with
 
 |![](./docs/Maxwell_1D_xpu_exp.gif)|
 |:--:| 
-| *Maxwell FDTD 1D simulation nx=200, nt=450 - $E_z$ field* |
+| *Maxwell FDTD 1D simulation nx=200, nt=450 - Ez field* |
 
 As we can see the additive source is added at the TSFS boundary (at index 50). The "wave" is then propagated until the interface between the free-space and the dielectric region (at index 100) where one part get reflected and the other part continues into the dielectric region. At the lossy layer index (at index 180) we start to introduce loss in the simulation, this the magnitude of the wave start to decrease. 
 
