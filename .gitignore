@@ -3,3 +3,6 @@ Manifest.toml
 .o
 .e
 /docs/viz_out
+/docs/viz_out_1D
+/docs/viz_out_2D
+/docs/viz_out_3D
