@@ -21,7 +21,7 @@ for i in 2:4
     end
 end
 @testset "Unit Test: update_Ex" begin
-    @test isapprox(Ex, expected_result_x, atol=1e-10)
+    @test isapprox(Ex, expected_result_x)
 end
 
 # ---- Unit test Ey ----
@@ -43,7 +43,7 @@ for i in 2:5
     end
 end
 @testset "Unit Test: update_Ey" begin
-    @test isapprox(Ey, expected_result_y, atol=1e-10)
+    @test isapprox(Ey, expected_result_y)
 end
 
 # ---- Reference test ----
@@ -60,5 +60,5 @@ Hz_ref = load("../test/ref_Hz_2D_cpu.jld")
 array_value = Hz_ref["data"]
 
 @testset "Reference Test: Hz_ref = Hz" begin
-    @test array_value ≈ Hz
+    @test isapprox(Hz, array_value)
 end

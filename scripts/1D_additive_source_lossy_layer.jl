@@ -1,4 +1,4 @@
-const USE_GPU = true
+const USE_GPU = false
 using ParallelStencil
 using ParallelStencil.FiniteDifferences1D
 @static if USE_GPU
@@ -6,7 +6,7 @@ using ParallelStencil.FiniteDifferences1D
 else
     @init_parallel_stencil(Threads, Float64, 1, inbounds=true)
 end
-using Plots, LaTeXStrings, Colors, ColorSchemes, Printf
+using Plots, LaTeXStrings, Colors, ColorSchemes, Printf, JLD
 
 plot_font = "Computer Modern"
 default(fontfamily=plot_font, framestyle=:box, label=true, grid=true, labelfontsize=11, tickfontsize=11, titlefontsize=13)
@@ -81,7 +81,7 @@ function ABC_bc(E_z)
     return nothing
 end
     
-function FDTD_1D(; bc="exp", do_visu=false)
+function FDTD_1D(nx_, nt_, nvis_; bc="exp", do_visu=false, do_test=false)
     # Physics
     imp0 = 377.0                        # free space impedance
     if bc == "exp"
@@ -100,9 +100,9 @@ function FDTD_1D(; bc="exp", do_visu=false)
     
 
     # Numerics
-    nx     = 200                # number of cells
-    nt     = 450                # number of time steps
-    nvis   = 10                 # visualization interval
+    nx     = nx_                # number of cells
+    nt     = nt_                # number of time steps
+    nvis   = nvis_              # visualization interval
     Cdt_dx = 1.0                # Courant number: c * dt/dx
 
     if bc == "exp"
@@ -215,9 +215,19 @@ function FDTD_1D(; bc="exp", do_visu=false)
         p3 = plot(max_E_z, label=L"$E_z$", title="Maximum \$E_z\$ across all iterations", ylims=(0.0, 1.5), xlims=(0,nx), legend=:topright, dpi=300)
         savefig(p3, "./docs/1D_additive_source_TSFS_max_E_z.png")
     end
+    
+    # testing
+    if do_test == true
+        if USE_GPU
+            save("../test/ref_Ez_1D_gpu.jld", "data", E_z)         # store case for reference testing
+        else
+            save("../test/ref_Ez_1D_cpu.jld", "data", E_z)         # store case for reference testing
+        end
+    end
 
-    return
+    return Array(E_z)
 end
 
-FDTD_1D(do_visu=true, bc="exp")
+#FDTD_1D(do_visu=true, bc="exp")
 #FDTD_1D(do_visu=true, bc="sin")
+#FDTD_1D(do_visu=false, do_test=true, bc="exp")

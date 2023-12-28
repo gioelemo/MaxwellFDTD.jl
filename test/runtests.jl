@@ -7,6 +7,7 @@ function runtests()
 
     printstyled("Testing MaxwellFDTD.jl\n"; bold=true, color=:white)
     try
+        run(`$exename -O3 --startup-file=no $(joinpath(testdir, "test1D.jl"))`)
         run(`$exename -O3 --startup-file=no $(joinpath(testdir, "test2D.jl"))`)
         #run(`$exename -O3 --startup-file=no $(joinpath(testdir, "test3D.jl"))`)
     catch e
