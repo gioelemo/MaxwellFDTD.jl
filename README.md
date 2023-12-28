@@ -77,11 +77,14 @@ $$
 $$
 
 And similarly Ampere's law (Equation 2) can be written as:
-$$\epsilon \frac{\partial \mathbf{E}}{\partial t}=\nabla \times \mathbf{H}=\left|\begin{array}{ccc}
-\hat{\mathbf{a}}_x & \hat{\mathbf{a}}_y & \hat{\mathbf{a}}_z \\
+
+$$
+\epsilon \frac{\partial \boldsymbol{E}}{\partial t}=\nabla \times \boldsymbol{H}=\left|\begin{array}{ccc}
+\hat{\boldsymbol{a}}_x & \hat{\boldsymbol{a}}_y & \hat{\boldsymbol{a}}_z \\
 \frac{\partial}{\partial x} & 0 & 0 \\
 0 & H_y & 0
-\end{array}\right|=\hat{\mathbf{a}}_z \frac{\partial H_y}{\partial x} \tag{4}$$
+\end{array}\right|=\hat{\boldsymbol{a}}_z \frac{\partial H_y}{\partial x} \tag{4}
+$$
 
 The scalar equations form (3) and (4) in 1D are given as:
 
