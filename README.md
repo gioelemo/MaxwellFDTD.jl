@@ -67,11 +67,11 @@ The goal of this section is to provide a simple code for a Finite Difference Tim
 We assume in this case that the electric field only has a $z$ component.
 
 In this case Faraday's law (Equation 1) can be written as:
-$$-\mu \frac{\partial \mathbf{H}}{\partial t}=\nabla \times \mathbf{E}=\left|\begin{array}{ccc}
-\hat{\mathbf{a}}_x & \hat{\mathbf{a}}_y & \hat{\mathbf{a}}_z \\
+$$-\mu \frac{\partial \boldsymbol{H}}{\partial t}=\nabla \times \boldsymbol{E}=\left|\begin{array}{ccc}
+\hat{\boldsymbol{a}}_x & \hat{\boldsymbol{a}}_y & \hat{\boldsymbol{a}}_z \\
 \frac{\partial}{\partial x} & 0 & 0 \\
 0 & 0 & E_z
-\end{array}\right|=-\hat{\mathbf{a}}_y \frac{\partial E_z}{\partial x} \tag{3} $$
+\end{array}\right|=-\hat{\boldsymbol{a}}_y \frac{\partial E_z}{\partial x} \tag{3} $$
 
 And similarly Ampere's law (Equation 2) can be written as:
 $$\epsilon \frac{\partial \mathbf{E}}{\partial t}=\nabla \times \mathbf{H}=\left|\begin{array}{ccc}
