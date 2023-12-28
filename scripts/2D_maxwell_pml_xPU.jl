@@ -90,8 +90,8 @@ end
     if do_visu
         # plotting environment
         ENV["GKSwstype"]="nul"
-        if isdir("../docs/viz_out")==false mkdir("../docs/viz_out") end
-        loadpath = "../docs/viz_out/"; anim = Animation(loadpath,String[])
+        if isdir("../docs/viz_out_2D")==false mkdir("../docs/viz_out_2D") end
+        loadpath = "../docs/viz_out_2D/"; anim = Animation(loadpath,String[])
         println("Animation directory: $(anim.dir)")
         iframe = 0
     end
@@ -118,7 +118,7 @@ end
             rect_y = [pml_width, pml_width, ny_pml-pml_width+1, nx_pml-pml_width+1, pml_width]
             plot!(plt, rect_x, rect_y, line=:black, linewidth=2, fillalpha=0, legend=false)
 
-            png(plt, @sprintf("../docs/viz_out/maxwell2D_%04d.png",iframe+=1))
+            png(plt, @sprintf("../docs/viz_out_2D/maxwell2D_%04d.png",iframe+=1))
             
             # Display the plot (work only local)
             # display(plt)

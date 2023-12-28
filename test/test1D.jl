@@ -1,6 +1,6 @@
 using Test
 
-include("../scripts/1D_additive_source_lossy_layer.jl")
+include("../scripts/1D_maxwell_additive_source_lossy_layer.jl")
 
 # ---- Unit test for 1D code update_E_z! ----
 E_z = zeros(10)

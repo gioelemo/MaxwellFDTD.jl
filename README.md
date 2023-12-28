@@ -139,7 +139,7 @@ We can additionally define the Courant number $S_c$ as
 $$S_c := \frac{c \Delta_t}{\Delta_x}$$
 
 ### Code
-The method of the previous subsection is implemented in the [1D_additive_source_lossy_layer.jl](./scripts/1D_additive_source_lossy_layer.jl) file.
+The method of the previous subsection is implemented in the [1D_maxwell_additive_source_lossy_layer.jl](./scripts/1D_maxwell_additive_source_lossy_layer.jl) file.
 
 We can use the following update equations when working with integer indexes and assuming that $S_c=1$:
 
@@ -181,7 +181,7 @@ width    = 100.0 # width of  Gaussian pulse
 location = 30.0  # location of Gaussian pulse
 ```
 After running the code with 
-`sbatch run_1D_maxwell_lossy_layer_xPU.sh` (works for both CPU and GPU by changing the `USE_GPU` flag in the [1D_additive_source_lossy_layer.jl](./scripts/1D_additive_source_lossy_layer.jl) file.) we get the following animation for the $E_z$ field
+`sbatch run_1D_maxwell_lossy_layer_xPU.sh` (works for both CPU and GPU by changing the `USE_GPU` flag in the [1D_maxwell_additive_source_lossy_layer.jl](./scripts/1D_maxwell_additive_source_lossy_layer.jl) file.) we get the following animation for the $E_z$ field
 
 |![](./docs/Maxwell_1D_xpu_exp.gif)|
 |:--:| 
@@ -208,7 +208,7 @@ location = 0.0   # location of Gaussian pulse
 ```
 
 After running the code with 
-`sbatch run_1D_maxwell_lossy_layer_xPU.sh` (works for both CPU and GPU by changing the `USE_GPU` flag in the [1D_additive_source_lossy_layer.jl](./scripts/1D_additive_source_lossy_layer.jl) file.) we get the following animation for the $E_z$ field
+`sbatch run_1D_maxwell_lossy_layer_xPU.sh` (works for both CPU and GPU by changing the `USE_GPU` flag in the [1D_maxwell_additive_source_lossy_layer.jl](./scripts/1D_maxwell_additive_source_lossy_layer.jl) file.) we get the following animation for the $E_z$ field
 
 |![](./docs/Maxwell_1D_xpu_sin.gif)|
 |:--:|
@@ -216,7 +216,7 @@ After running the code with
 
 As in the previous example, we can also see here that the additive source is added at the TSFS boundary (at index 50). The "wave" is then propagated until the interface between the free-space and the dielectric region (at index 100) where one part get reflected and the other part continues into the dielectric region. In this case we start to introduce loss directly at the start of the dielectric region (and not later as done in the previous example) in the simulation, this the magnitude of the wave start to decrease. 
 
-It is also possible to observe that at the left part of the computational domain, the wave is not reflected. This is due to the use of Absorbing Boundary Conditions (ABC).
+Also here, tt is possible to observe that at the left part of the computational domain, the wave is not reflected. This is due to the use of Absorbing Boundary Conditions (ABC).
 
 
 
