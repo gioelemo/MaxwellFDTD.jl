@@ -228,6 +228,6 @@ function FDTD_1D(nx_, nt_, nvis_; bc="exp", do_visu=false, do_test=false)
     return Array(E_z)
 end
 
-#FDTD_1D(do_visu=true, bc="exp")
-#FDTD_1D(do_visu=true, bc="sin")
-#FDTD_1D(do_visu=false, do_test=true, bc="exp")
+#FDTD_1D(nx_ = 200; nt_ = 450; nvis_ = 10; do_visu=true, bc="exp")
+#FDTD_1D(nx_ = 200; nt_ = 450; nvis_ = 10; do_visu=true, bc="sin")
+#FDTD_1D(nx_ = 200; nt_ = 450; nvis_ = 10; do_visu=false, do_test=true, bc="exp")

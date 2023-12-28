@@ -8,9 +8,9 @@
 - [Setup](#setup)
 - [Mathematical formulation](#mathematical-formulation)
 - [Numerical Methods](#numerical-methods)
-- [1D FTDT](#1d-ftdt)
-- [2D FTDT](#2d-ftdt)
-- [3D FTDT](#3d-ftdt)
+- [1D FDTD](#1d-fdtd)
+- [2D FDTD](#2d-fdtd)
+- [3D FDTD](#3d-fdtd)
 - [Testing](#testing)
 - [Results and conclusions](#results-and-conclusions)
 - [References](#references)
@@ -45,7 +45,7 @@ $\boldsymbol{D} = \epsilon \boldsymbol{E} $
 
 $\boldsymbol{B} = \mu \boldsymbol{H} $
 
-$\nabla \times \boldsymbol{E} = - \mu\frac{\partial\boldsymbol{H}}{\partial t}$
+$$\nabla \times \boldsymbol{E} = - \mu\frac{\partial\boldsymbol{H}}{\partial t} \tag{1}$$
 
 
 $\nabla \times \boldsymbol{H} = J_c + \epsilon\frac{\partial\boldsymbol{E}}{\partial t}$
@@ -60,7 +60,14 @@ This method introduced by Kane S. Yee [1] consists of discretizing the time-depe
 
 The finite-difference equations derived from this process are addressed in a leapfrog fashion, either through software or hardware. Initially, the electric field vector components within a specific spatial volume are resolved at a particular moment in time. Subsequently, the magnetic field vector components in the same spatial domain are addressed in the subsequent time step. This iterative process continues until the anticipated transient or steady-state electromagnetic field behavior is completely developed [2].
 
-## 1D FTDT
+## 1D FDTD
+The goal of this section is to provide a simple code for a Finite Difference Time domain simulatior for solving a simple version of the Maxwell equations in 1D.
+
+We assume in this case that the electric field only has a $z$ component.
+
+
+We can re from the equation provided
+
 
 TODO: Explain formulas in 1D + results
 
@@ -73,7 +80,7 @@ $$
 \end{align}
 $$
 
-## 2D FTDT
+## 2D FDTD
 
 TODO: Explain formulas in 2D + results
 
@@ -106,7 +113,7 @@ We have the following three animations:
 
 ![](./docs/Maxwell_2D_xpu_alpha=500.gif)
 
-## 3D FTDT
+## 3D FDTD
 
 TODO: Explain formulas in 3D + results
 
