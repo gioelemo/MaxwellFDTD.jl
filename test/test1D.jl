@@ -44,7 +44,7 @@ end
 nx_ = 200; nt_ = 450; nvis_ = 10
 
 
-Ez = FDTD_1D(nx_, nt_, nvis_; bc="exp", do_visu=false, do_test=false)
+Ez = FDTD_1D(nx_, nt_, nvis_; src="exp", do_visu=false, do_test=false)
 
 Ez_ref = zeros(Float32, nx_ + 1)
 Ez_ref = load("../test/ref_Ez_1D_cpu.jld")
