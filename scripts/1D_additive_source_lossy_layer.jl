@@ -6,7 +6,7 @@ using ParallelStencil.FiniteDifferences1D
 else
     @init_parallel_stencil(Threads, Float64, 1, inbounds=true)
 end
-using Plots, LaTeXStrings, Colors, ColorSchemes
+using Plots, LaTeXStrings, Colors, ColorSchemes, Printf
 
 plot_font = "Computer Modern"
 default(fontfamily=plot_font, framestyle=:box, label=true, grid=true, labelfontsize=11, tickfontsize=11, titlefontsize=13)
@@ -134,6 +134,16 @@ function FDTD_1D(; bc="exp", do_visu=false)
         @parallel update_H_y_loss_coeff2!(H_y_e_loss, H_y_h_loss, imp0, loss, loss_layer_index)
     end
 
+    # visualisation for cluster
+    if do_visu
+        # plotting environment
+        ENV["GKSwstype"]="nul"
+        if isdir("../docs/viz_out_1D")==false mkdir("../docs/viz_out_1D") end
+        loadpath = "../docs/viz_out_1D/"; anim = Animation(loadpath,String[])
+        println("Animation directory: $(anim.dir)")
+        iframe = 0
+    end
+
     # Time stepping
     for it in 1:nt
         
@@ -166,15 +176,12 @@ function FDTD_1D(; bc="exp", do_visu=false)
 
         E_z[TSFS_boundary + 1] += correction_E_z
 
-        # Utility to save figures
-        save_file = false
-
         # Color palette
         colors = ColorSchemes.davos10.colors
 
         # visualization
         if do_visu && (it % nvis == 0)
-            p1 = plot(E_z, label=L"$E_z$", title="\$E_z\$ at it=$it", ylims=(-1.0, 1.0), xlims=(0,nx), legend=:topright)
+            p1 = plot(E_z, label=L"$E_z$", title="\$E_z\$ at it=$it", ylims=(-1.0, 1.0), xlims=(0,nx), legend=:topright, dpi=300)
             
             vspan!([0, interface_index], color=colors[4], alpha=0.2, label="")
             vspan!([interface_index, loss_layer_index], color=colors[6], alpha=0.2, label="")
@@ -183,16 +190,15 @@ function FDTD_1D(; bc="exp", do_visu=false)
             vline!([interface_index], color=colors[2], linestyle=:dash, label="Interface free space - dielectric")
             vline!([loss_layer_index], color=colors[1], linestyle=:dashdot, label="Lossy layer index")
             
-            display(p1)
+            #display(p1)
+
+            png(p1, @sprintf("../docs/viz_out_1D/1D_additive_source_TSFS_%04d.png",iframe+=1))
 
             #p2 = plot(H_y, label=L"$H_y$", title="\$H_y\$ at it=$it", ylims=(-0.05, 0.05))
             #display(p2)
 
-            if save_file == true
-                savefig(p1, "./docs/1D_additive_source_TSFS_$it.png")
-            end
 
-            sleep(0.2)
+            #sleep(0.2)
         end
 
         if bc == "sin"
