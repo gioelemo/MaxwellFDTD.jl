@@ -45,10 +45,11 @@ $\boldsymbol{D} = \epsilon \boldsymbol{E} $
 
 $\boldsymbol{B} = \mu \boldsymbol{H} $
 
-$$\nabla \times \boldsymbol{E} = - \mu\frac{\partial\boldsymbol{H}}{\partial t} \tag{1}$$
+Faraday's law
+$$\nabla \times \boldsymbol{E} = - \mu\frac{\partial\boldsymbol{H}}{\partial t} \tag{1} $$
 
-
-$\nabla \times \boldsymbol{H} = J_c + \epsilon\frac{\partial\boldsymbol{E}}{\partial t}$
+Ampere's law
+$$\nabla \times \boldsymbol{H} = J_c + \epsilon\frac{\partial\boldsymbol{E}}{\partial t} \tag{2}$$
 
 ## Numerical Methods
 
@@ -61,24 +62,93 @@ This method introduced by Kane S. Yee [1] consists of discretizing the time-depe
 The finite-difference equations derived from this process are addressed in a leapfrog fashion, either through software or hardware. Initially, the electric field vector components within a specific spatial volume are resolved at a particular moment in time. Subsequently, the magnetic field vector components in the same spatial domain are addressed in the subsequent time step. This iterative process continues until the anticipated transient or steady-state electromagnetic field behavior is completely developed [2].
 
 ## 1D FDTD
-The goal of this section is to provide a simple code for a Finite Difference Time domain simulatior for solving a simple version of the Maxwell equations in 1D.
+The goal of this section is to provide a simple code for a Finite Difference Time domain simulator for solving a simple version of the Maxwell equations in 1D.
 
 We assume in this case that the electric field only has a $z$ component.
 
+In this case Faraday's law (Equation 1) can be written as:
+$$-\mu \frac{\partial \mathbf{H}}{\partial t}=\nabla \times \mathbf{E}=\left|\begin{array}{ccc}
+\hat{\mathbf{a}}_x & \hat{\mathbf{a}}_y & \hat{\mathbf{a}}_z \\
+\frac{\partial}{\partial x} & 0 & 0 \\
+0 & 0 & E_z
+\end{array}\right|=-\hat{\mathbf{a}}_y \frac{\partial E_z}{\partial x} \tag{3} $$
 
-We can re from the equation provided
+And similarly Ampere's law (Equation 2) can be written as:
+$$\epsilon \frac{\partial \mathbf{E}}{\partial t}=\nabla \times \mathbf{H}=\left|\begin{array}{ccc}
+\hat{\mathbf{a}}_x & \hat{\mathbf{a}}_y & \hat{\mathbf{a}}_z \\
+\frac{\partial}{\partial x} & 0 & 0 \\
+0 & H_y & 0
+\end{array}\right|=\hat{\mathbf{a}}_z \frac{\partial H_y}{\partial x} \tag{4}$$
 
-
-TODO: Explain formulas in 1D + results
-
-The update equations in 1D are given as:
+The scalar equations form (3) and (4) in 1D are given as:
 
 $$
-\begin{align}
-\mu \frac{\partial H_y}{\partial t} &= \frac{\partial E_z}{\partial x} \\
-\epsilon \frac{\partial E_z}{\partial t} &= \frac{\partial H_y}{\partial x}
-\end{align}
+\begin{align*}
+\mu \frac{\partial H_y}{\partial t} &= \frac{\partial E_z}{\partial x} \tag{5}\\
+\epsilon \frac{\partial E_z}{\partial t} &= \frac{\partial H_y}{\partial x} \tag{6}
+\end{align*}
 $$
+We can then transform the previous two equation using a finite difference approach as follow:
+
+1. For $H_y$:
+$$\begin{align*}
+\mu \frac{H_y^{q+\frac{1}{2}}\left[m+\frac{1}{2}\right]-H_y^{q-\frac{1}{2}}\left[m+\frac{1}{2}\right]}{\Delta_t}&=\frac{E_z^q[m+1]-E_z^q[m]}{\Delta_x} \\
+
+H_y^{q+\frac{1}{2}}\left[m+\frac{1}{2}\right]&=H_y^{q-\frac{1}{2}}\left[m+\frac{1}{2}\right]+\frac{\Delta_t}{\mu \Delta_x}\left(E_z^q[m+1]-E_z^q[m]\right)
+\end{align*}
+$$
+
+2.  For $E_z$:
+$$
+\begin{align*}
+\epsilon \frac{E_z^{q+1}[m]-E_z^q[m]}{\Delta_t}&=\frac{H_y^{q+\frac{1}{2}}\left[m+\frac{1}{2}\right]-H_y^{q+\frac{1}{2}}\left[m-\frac{1}{2}\right]}{\Delta_x}\\
+E_z^{q+1}[m]&=E_z^q[m]+\frac{\Delta_t}{\epsilon \Delta_x}\left(H_y^{q+\frac{1}{2}}\left[m+\frac{1}{2}\right]-H_y^{q+\frac{1}{2}}\left[m-\frac{1}{2}\right]\right)
+\end{align*}
+$$
+
+where:
+- $E_z^{q+1}[m]$: Electric field component $E_z$ at spatial position $m$ and time step $q+1$.
+
+- $E_z^q[m]$: Electric field component $E_z$ at spatial position $m$ and time step $q$.
+
+- $\epsilon$: Permittivity of the medium.
+
+- $\mu$: Permeability of the medium.
+
+- $\Delta_t$: Time step size.
+
+- $\Delta_x$: Spatial step size.
+
+- $H_y^{q+\frac{1}{2}}\left[m+\frac{1}{2}\right]$: Magnetic field component $H_y$ at the half-integer spatial position $m+\frac{1}{2}$ and time step $q+\frac{1}{2}$.
+
+- $H_y^{q+\frac{1}{2}}\left[m-\frac{1}{2}\right]$: Magnetic field component $H_y$ at the half-integer spatial position $m-\frac{1}{2}$ and time step $q+\frac{1}{2}$.
+
+We define the Courant number $S_c$ as
+$$S_c := \frac{c \Delta_t}{\Delta_x}$$
+
+We can use the following update equations when working with integer indexes and assuming that $S_c=1$:
+
+- The magnetic-field nodes can be updated with:
+`hy[m] = hy[m] + (ez[m + 1] - ez[m]) / imp0`
+
+- The electric-field nodes can be updated with: `ez[m] = ez[m] + (hy[m] - hy[m - 1]) * imp0`
+
+where `imp0` is the characteristic impedance of free space (approximately 377 $\Omega$).
+
+This method is implemented in the [1D_additive_source_lossy_layer.jl](./scripts/1D_additive_source_lossy_layer.jl) file.
+
+In this code is also additionally implemented:
+
+1. Additive source in an explicit point of the domain (i.e. at the TSFS boundary). This source can be a Gaussian function (with specified width and location) or a sinusoidal function. This is done in the `correct_E_z()` and  `correct_E_z2()` functions. 
+
+2. A Total-Field/Scattered-Field (TFSF) Boundary which separate the total field into incident and scattered components, allowing for accurate characterization of the scattered electromagnetic waves in the vicinity of the simulation domain.
+
+3. An absorbing boundary condition (ABC) on the left part of the $E_z$ field to simulate an open and infinite environment by introducing a boundary that absorbs outgoing waves, minimizing reflections from the simulation domain boundaries. This is done in `ABC_bc()` function.
+
+4. An interface index between free space and dielectric space (controlled by the `interface_index` parameter) 
+
+5. A lossy region where some loss is introduced (controlled by the `loss_layer_index` , `epsR` and `loss` variables).
+
 
 ## 2D FDTD
 
@@ -89,21 +159,21 @@ The update equations in 1D are given as:
 
 ### $TM^z$
 $$
-\begin{align}
+\begin{align*}
 -\sigma_m H_x - \mu \frac{\partial H_x}{\partial t} &= \frac{\partial E_z}{\partial y} \\
 \sigma_m H_y + \mu \frac{\partial H_y}{\partial t} &= \frac{\partial E_z}{\partial x} \\
 \sigma E_z + \epsilon \frac{\partial E_z}{\partial t} &= \frac{\partial H_y}{\partial x} -\frac{\partial H_x}{\partial y}
-\end{align}
+\end{align*}
 $$
 
 ### $TE^z$
 
 $$
-\begin{align}
+\begin{align*}
 \sigma E_x + \epsilon \frac{\partial E_x}{\partial t} &= \frac{\partial H_z}{\partial y} \\
 \sigma E_y + \epsilon \frac{\partial E_y}{\partial t} &= -\frac{\partial H_z}{\partial x} \\
 -\sigma_m H_z - \mu\frac{\partial H_z}{\partial t} &= \frac{\partial E_y}{\partial x} - \frac{\partial E_x}{\partial y}
-\end{align}
+\end{align*}
 $$
 
 We have the following three animations:
