@@ -185,18 +185,38 @@ After running the code with
 
 |![](./docs/Maxwell_1D_xpu_exp.gif)|
 |:--:| 
-| *Maxwell FDTD 1D simulation nx=200, nt=450 - Ez field* |
+| *Maxwell FDTD 1D simulation nx=200, nt=450 - Ez field, exp source* |
 
 As we can see the additive source is added at the TSFS boundary (at index 50). The "wave" is then propagated until the interface between the free-space and the dielectric region (at index 100) where one part get reflected and the other part continues into the dielectric region. At the lossy layer index (at index 180) we start to introduce loss in the simulation, this the magnitude of the wave start to decrease. 
 
 It is also possible to observe that at the left part of the computational domain, the wave is not reflected. This is due to the use of Absorbing Boundary Conditions (ABC).
 
+Similar as before we can run the code with a sin source with the following parameters:
+```julia
+nx   = 200    # number space steps
+nt   = 450    # number timesteps
+nvis = 10     # interval visualisation
+src  = "sin"  # Sin source
+imp0 = 377.0  # free space impedance
+loss = 0.0253146   # loss factor
+interface_index = 100  # interface index between free space-dielectric
+epsR = 4.0       # relative permittivity
+N_lambda = 40.0  # number of points per wavelengths
+TSFS_boundary_index  = 50    # TSFS index
+Cdt_dx   = 1.0   # Courant's number
+location = 0.0   # location of Gaussian pulse
+```
 
+After running the code with 
+`sbatch run_1D_maxwell_lossy_layer_xPU.sh` (works for both CPU and GPU by changing the `USE_GPU` flag in the [1D_additive_source_lossy_layer.jl](./scripts/1D_additive_source_lossy_layer.jl) file.) we get the following animation for the $E_z$ field
 
-TODO sin example
-![](./docs/Maxwell_1D_xpu_sin.gif)
+|![](./docs/Maxwell_1D_xpu_sin.gif)|
+|:--:|
+| *Maxwell FDTD 1D simulation nx=200, nt=450 - Ez field, sin source* |
 
+As in the previous example, we can also see here that the additive source is added at the TSFS boundary (at index 50). The "wave" is then propagated until the interface between the free-space and the dielectric region (at index 100) where one part get reflected and the other part continues into the dielectric region. In this case we start to introduce loss directly at the start of the dielectric region (and not later as done in the previous example) in the simulation, this the magnitude of the wave start to decrease. 
 
+It is also possible to observe that at the left part of the computational domain, the wave is not reflected. This is due to the use of Absorbing Boundary Conditions (ABC).
 
 
 
