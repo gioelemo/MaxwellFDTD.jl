@@ -1,7 +1,8 @@
 .DS_Store
 Manifest.toml
-.o
-.e
+*.o
+*.e
+*.bin
 /docs/viz_out
 /docs/viz_out_1D
 /docs/viz_out_2D
