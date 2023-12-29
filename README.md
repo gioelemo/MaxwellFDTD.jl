@@ -326,23 +326,22 @@ We can run the code using
 
 ```julia
 # physics
-lx, ly = 40.0, 40.0
-ε0 = 1.0
-μ0 = 1.0
-σ = 1.0
+lx, ly = 40.0, 40.0    # physical size
+ε0 = 1.0               # permittivity
+μ0 = 1.0               # permeability
+σ = 1.0                # electrical conductivity
 
 # numerics
-nx, ny = 255, 256
+nx, ny = 255, 256      # number space steps
 
 # PML parameters
-pml_width = 50
+pml_width = 50         # PML extensions
 
 # Extend the grid
 nx_pml, ny_pml = nx + 2 * pml_width, ny + 2 * pml_width
 
-nt = 15000
-
-nvis = 100
+nt   = 15000           # number of time steps
+nvis = 100             # visualisation interval
 ```
 
 We test the code with different values of $\text{pml alpha}$
