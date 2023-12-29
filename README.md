@@ -89,7 +89,8 @@ $$\nabla \times \boldsymbol{E} = - \mu\frac{\partial\boldsymbol{H}}{\partial t} 
 Ampere's law:
 $$\nabla \times \boldsymbol{H} = J_c + \epsilon\frac{\partial\boldsymbol{E}}{\partial t} \tag{2}$$
 
-For a more detailed review of electromagnetics consider  [3] (Chapter 2  - Brief Review of Electromagnetics)
+For a more detailed review of electromagnetics consider  [3] (Chapter 2  - Brief Review of Electromagnetics).
+
 ## Numerical Methods
 
 To solve the equations it is possible to use the Finite Difference Time Domain Method (FDTD).
