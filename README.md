@@ -299,20 +299,20 @@ The PML boundary conditions are applied to absorb outgoing waves. In the code, t
 1. Update Equation for PML in $x$-direction (for $E_x$):
 
 $$
-E_x[i,j] = e^{-(\text{pml\_width}-i)\cdot\text{pml\_alpha}}\cdot E_x[i,j]
+E_x[i,j] = e^{-(\text{pml width}-i)\cdot\text{pml alpha}}\cdot E_x[i,j]
 $$
-(applied to the first and last $\text{pml\_width}$ rows of $E_x$).
+(applied to the first and last $\text{pml width}$ rows of $E_x$).
 
 2. Update Equation for PML in $y$-direction (for $E_y$):
 
 $$
-E_y[j,i] = e^{-(\text{pml\_width}-i)\cdot\text{pml\_alpha}}\cdot E_y[j,i]
+E_y[j,i] = e^{-(\text{pml width}-i)\cdot\text{pml alpha}}\cdot E_y[j,i]
 $$
-(applied to the first and last $\text{pml\_width}$ rows of $E_y$).
+(applied to the first and last $\text{pml width}$ rows of $E_y$).
 
 where:
-- $\text{pml\_width}$: is the width of the extension of the domain in $x$ and $y$ direction.
-- $\text{pml\_alpha}$: is the factor which control the effect of the PML boundary.
+- $\text{pml width}$: is the width of the extension of the domain in $x$ and $y$ direction.
+- $\text{pml alpha}$: is the factor which control the effect of the PML boundary.
 
 
 ### Code
@@ -345,7 +345,7 @@ nvis = 100
 
 We test the code with different values of $\text{pml\_alpha}$
 
-1. $\text{pml\_alpha}=0.0$ (i.e. no PML boundary)
+1. $\text{pml alpha}=0.0$ (i.e. no PML boundary)
 
 The resulting animation is given as:
 
@@ -355,9 +355,9 @@ The resulting animation is given as:
 
 The black square represent the distinction between the original computational domain and the extended domain when adding the PML layer. 
 
-In this case we observe that no waves are absorbed by the PML since the value of $\text{pml\_alpha}=0.0$.
+In this case we observe that no waves are absorbed by the PML since the value of $\text{pml alpha}=0.0$.
 
-2. $\text{pml\_alpha}=0.1$ (i.e. slightly PML boundary)
+2. $\text{pml alpha}=0.1$ (i.e. slightly PML boundary)
 
 The resulting animation is given as:
 
@@ -365,9 +365,9 @@ The resulting animation is given as:
 |:--:|
 | *Maxwell FDTD 2D simulation nx=255, ny=256, nt=15000, nvis=100, alpha=0.1 - Hz field*|
 
-Different as the previous case we observe that some waves are partially absorbed by the PML because we use a value of $\text{pml\_alpha}=0.1$.
+Different as the previous case we observe that some waves are partially absorbed by the PML because we use a value of $\text{pml alpha}=0.1$.
 
-3. $\text{pml\_alpha}=5.0$ (i.e. PML boundary)
+3. $\text{pml alpha}=5.0$ (i.e. PML boundary)
 
 The resulting animation is given as:
 
@@ -375,7 +375,7 @@ The resulting animation is given as:
 |:--:|
 | *Maxwell FDTD 2D simulation nx=255, ny=256, nt=15000, nvis=100, alpha=5.0 - Hz field*|
 
-Similar to the previous case we observe that some waves are partially absorbed by the PML because we use a value of $\text{pml\_alpha}=5.0$. The absorbtion is a bit big compared to the previous case, but it is very difficult to see from this animation.
+Similar to the previous case we observe that some waves are partially absorbed by the PML because we use a value of $\text{pml alpha}=5.0$. The absorbtion is a bit big compared to the previous case, but it is very difficult to see from this animation.
 
 
 ## 3D FDTD
