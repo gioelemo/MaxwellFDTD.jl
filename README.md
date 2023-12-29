@@ -71,13 +71,13 @@ where:
 we can additionaly have:
 
 - Isotropic linear dielectric:
-$$\boldsymbol{D} = \epsilon \boldsymbol{E} $$
+$$\boldsymbol{D} = \varepsilon \boldsymbol{E} $$
 
 - Isotropic linear magnetic medium:
 $$\boldsymbol{B} = \mu \boldsymbol{H} $$
 
 where
-- $\epsilon$ is the permittivity
+- $\varepsilon$ is the permittivity
 - $\mu$ is the permeability
 
 
@@ -87,7 +87,7 @@ Faraday's law:
 $$\nabla \times \boldsymbol{E} = - \mu\frac{\partial\boldsymbol{H}}{\partial t} \tag{1} $$
 
 Ampere's law:
-$$\nabla \times \boldsymbol{H} = J_c + \epsilon\frac{\partial\boldsymbol{E}}{\partial t} \tag{2}$$
+$$\nabla \times \boldsymbol{H} = J_c + \varepsilon\frac{\partial\boldsymbol{E}}{\partial t} \tag{2}$$
 
 For a more detailed review of electromagnetics consider  [3] (Chapter 2  - Brief Review of Electromagnetics).
 
@@ -132,7 +132,7 @@ The scalar equations form (3) and (4) in 1D are given as:
 $$
 \begin{align*}
 \mu \frac{\partial H_y}{\partial t} &= \frac{\partial E_z}{\partial x} \tag{5}\\
-\epsilon \frac{\partial E_z}{\partial t} &= \frac{\partial H_y}{\partial x} \tag{6}
+\varepsilon \frac{\partial E_z}{\partial t} &= \frac{\partial H_y}{\partial x} \tag{6}
 \end{align*}
 $$
 
@@ -151,8 +151,8 @@ $$
 
 $$
 \begin{align*}
-\epsilon \frac{E_z^{q+1}[m]-E_z^q[m]}{\Delta_t}&=\frac{H_y^{q+\frac{1}{2}}\left[m+\frac{1}{2}\right]-H_y^{q+\frac{1}{2}}\left[m-\frac{1}{2}\right]}{\Delta_x}\\
-E_z^{q+1}[m]&=E_z^q[m]+\frac{\Delta_t}{\epsilon \Delta_x}\left(H_y^{q+\frac{1}{2}}\left[m+\frac{1}{2}\right]-H_y^{q+\frac{1}{2}}\left[m-\frac{1}{2}\right]\right)
+\varepsilon \frac{E_z^{q+1}[m]-E_z^q[m]}{\Delta_t}&=\frac{H_y^{q+\frac{1}{2}}\left[m+\frac{1}{2}\right]-H_y^{q+\frac{1}{2}}\left[m-\frac{1}{2}\right]}{\Delta_x}\\
+E_z^{q+1}[m]&=E_z^q[m]+\frac{\Delta_t}{\varepsilon \Delta_x}\left(H_y^{q+\frac{1}{2}}\left[m+\frac{1}{2}\right]-H_y^{q+\frac{1}{2}}\left[m-\frac{1}{2}\right]\right)
 \end{align*}
 $$
 
@@ -161,7 +161,7 @@ where:
 
 - $E_z^q[m]$: Electric field component $E_z$ at spatial position $m$ and time step $q$.
 
-- $\epsilon$: Permittivity of the medium.
+- $\varepsilon$: Permittivity of the medium.
 
 - $\mu$: Permeability of the medium.
 
@@ -261,42 +261,122 @@ Also here, tt is possible to observe that at the left part of the computational 
 ## 2D FDTD
 
 ### Mathematical Formulation
-TODO: Explain formulas in 2D + results
+By starting with the Maxwell's equation given in [this](#maxwells-equations) section, we get, in a similar way as in the 1D case the following equations ($TE^z$ polarization):
 
-The update equations in 1D are given as:
+$$
+\begin{align*}
+\sigma E_x + \varepsilon \frac{\partial E_x}{\partial t} &= \frac{\partial H_z}{\partial y} \tag{7}\\
+\sigma E_y + \varepsilon \frac{\partial E_y}{\partial t} &= -\frac{\partial H_z}{\partial x} \tag{8} \\
+-\sigma_m H_z - \mu\frac{\partial H_z}{\partial t} &= \frac{\partial E_y}{\partial x} - \frac{\partial E_x}{\partial y} \tag{9}
+\end{align*}
+$$
+
+We can transform the previous equation using finite difference into the following set of 2D update equations:
+
+1. For $E_x$ (Electric field in $x$-direction from Equation (7))
+
+$$
+E_x[:, 2:\text{end}-1] += \frac{\Delta t}{\varepsilon} \left( -\sigma \cdot E_x[:, 2:\text{end}-1] +  \frac{\partial H_z}{\partial y}\right)
+$$
+
+2. For $E_y$ (Electric field in $y$-direction from Equation (8))
+
+$$
+E_y[2:\text{end}-1,:] += \frac{\Delta t}{\varepsilon} \left( -\sigma \cdot E_y[2:\text{end}-1,:] +  \frac{\partial H_z}{\partial x}\right)
+$$
+
+
+3. For $H_z$ (Magnetic field in $z$-direction from Equation (9))
+
+$$
+H_z +=  \frac{\Delta t}{\mu}\left(-\sigma \cdot H_z + \frac{\partial E_x}{\partial y} - \frac{\partial E_y}{\partial x}\right)
+$$
+
+The Absorbing Boundary Conditions (ABC) of the 1D case can not efficiently transformed to the 2D example. We thus need to implement Perfectly Matched Layer (PML) Boundary Conditions as introduced in [4]. 
+
+The PML boundary conditions are applied to absorb outgoing waves. In the code, this is done using the following update equations for PML regions:
+
+1. Update Equation for PML in $x$-direction (for $E_x$):
+
+$$
+E_x[i,j] = e^{-(\text{pml\_width}-i)\cdot\text{pml\_alpha}}\cdot E_x[i,j]
+$$
+(applied to the first and last $\text{pml\_width}$ rows of $E_x$).
+
+2. Update Equation for PML in $y$-direction (for $E_y$):
+
+$$
+E_y[j,i] = e^{-(\text{pml\_width}-i)\cdot\text{pml\_alpha}}\cdot E_y[j,i]
+$$
+(applied to the first and last $\text{pml\_width}$ rows of $E_y$).
+
+where:
+- $\text{pml\_width}$: is the width of the extension of the domain in $x$ and $y$ direction.
+- $\text{pml\_alpha}$: is the factor which control the effect of the PML boundary.
+
+
 ### Code
+The mathematical formulation of the previous subsection can be translated into code. This code can be found in [2D_maxwell_pml_xPU](./scripts/2D_maxwell_pml_xPU.jl)
+The structure of the code is similar to the one of the 1D code.
 
-### $TM^z$
-$$
-\begin{align*}
--\sigma_m H_x - \mu \frac{\partial H_x}{\partial t} &= \frac{\partial E_z}{\partial y} \\
-\sigma_m H_y + \mu \frac{\partial H_y}{\partial t} &= \frac{\partial E_z}{\partial x} \\
-\sigma E_z + \epsilon \frac{\partial E_z}{\partial t} &= \frac{\partial H_y}{\partial x} -\frac{\partial H_x}{\partial y}
-\end{align*}
-$$
+We can run the code using
+`sbatch run_2D_maxwell_pml_xPU.sh` (works for both CPU and GPU by changing the `USE_GPU` flag in the [2D_maxwell_pml_xPU](./scripts/2D_maxwell_pml_xPU.jl) file.) with the following parameters:
 
-### $TE^z$
+```julia
+# physics
+lx, ly = 40.0, 40.0
+ε0 = 1.0
+μ0 = 1.0
+σ = 1.0
 
-$$
-\begin{align*}
-\sigma E_x + \epsilon \frac{\partial E_x}{\partial t} &= \frac{\partial H_z}{\partial y} \\
-\sigma E_y + \epsilon \frac{\partial E_y}{\partial t} &= -\frac{\partial H_z}{\partial x} \\
--\sigma_m H_z - \mu\frac{\partial H_z}{\partial t} &= \frac{\partial E_y}{\partial x} - \frac{\partial E_x}{\partial y}
-\end{align*}
-$$
+# numerics
+nx, ny = 255, 256
 
-We have the following three animations:
+# PML parameters
+pml_width = 50
+
+# Extend the grid
+nx_pml, ny_pml = nx + 2 * pml_width, ny + 2 * pml_width
+
+nt = 15000
+
+nvis = 100
+```
+
+We test the code with different values of $\text{pml\_alpha}$
+
+1. $\text{pml\_alpha}=0.0$ (i.e. no PML boundary)
+
+The resulting animation is given as:
+
 |![](./docs/Maxwell_2D_xpu_alpha=000.gif)|
 |:--:|
-| *Maxwell FDTD 2D simulation nx=.., ny, ..., nt=450 - Hz field, alpha=.0* |
+| *Maxwell FDTD 2D simulation nx=255, ny=256, nt=15000, nvis=100, alpha=0.0 - Hz field*|
+
+The black square represent the distinction between the original computational domain and the extended domain when adding the PML layer. 
+
+In this case we observe that no waves are absorbed by the PML since the value of $\text{pml\_alpha}=0.0$.
+
+2. $\text{pml\_alpha}=0.1$ (i.e. slightly PML boundary)
+
+The resulting animation is given as:
 
 |![](./docs/Maxwell_2D_xpu_alpha=010.gif)|
 |:--:|
-| *Maxwell FDTD 2D simulation nx=.., ny, ..., nt=450 - Hz field, alpha=.0.1* |
+| *Maxwell FDTD 2D simulation nx=255, ny=256, nt=15000, nvis=100, alpha=0.1 - Hz field*|
+
+Different as the previous case we observe that some waves are partially absorbed by the PML because we use a value of $\text{pml\_alpha}=0.1$.
+
+3. $\text{pml\_alpha}=5.0$ (i.e. PML boundary)
+
+The resulting animation is given as:
 
 |![](./docs/Maxwell_2D_xpu_alpha=500.gif)|
 |:--:|
-| *Maxwell FDTD 2D simulation nx=.., ny, ..., nt=450 - Hz field, alpha=.5* |
+| *Maxwell FDTD 2D simulation nx=255, ny=256, nt=15000, nvis=100, alpha=5.0 - Hz field*|
+
+Similar to the previous case we observe that some waves are partially absorbed by the PML because we use a value of $\text{pml\_alpha}=5.0$. The absorbtion is a bit big compared to the previous case, but it is very difficult to see from this animation.
+
 
 ## 3D FDTD
 
