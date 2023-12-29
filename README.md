@@ -301,6 +301,7 @@ The PML boundary conditions are applied to absorb outgoing waves. In the code, t
 $$
 E_x[i,j] = e^{-(\text{pml width}-i)\cdot\text{pml alpha}}\cdot E_x[i,j]
 $$
+
 (applied to the first and last $\text{pml width}$ rows of $E_x$).
 
 2. Update Equation for PML in $y$-direction (for $E_y$):
@@ -308,6 +309,7 @@ $$
 $$
 E_y[j,i] = e^{-(\text{pml width}-i)\cdot\text{pml alpha}}\cdot E_y[j,i]
 $$
+
 (applied to the first and last $\text{pml width}$ rows of $E_y$).
 
 where:
@@ -343,7 +345,7 @@ nt = 15000
 nvis = 100
 ```
 
-We test the code with different values of $\text{pml\_alpha}$
+We test the code with different values of $\text{pml alpha}$
 
 1. $\text{pml alpha}=0.0$ (i.e. no PML boundary)
 
