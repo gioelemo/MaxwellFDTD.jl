@@ -6,16 +6,16 @@
 
 - [Introduction](#introduction)
 - [Setup](#setup)
-- [Mathematical formulation](#mathematical-formulation)
+- [Maxwell's Equations](#maxwells-equations)
 - [Numerical Methods](#numerical-methods)
 - [1D FDTD](#1d-fdtd)
-    -  [Mathematical Formulation](#mathematical-formulation-1)
+    -  [Mathematical Formulation](#mathematical-formulation)
     -  [Code](#code)
 - [2D FDTD](#2d-fdtd)
-    -  [Mathematical Formulation](#mathematical-formulation-2)
+    -  [Mathematical Formulation](#mathematical-formulation-1)
      -  [Code](#code-1)
 - [3D FDTD](#3d-fdtd)
-    -  [Mathematical Formulation](#mathematical-formulation-3)
+    -  [Mathematical Formulation](#mathematical-formulation-2)
     -  [Code](#code-2)
 - [Testing](#testing)
 - [Results and conclusions](#results-and-conclusions)
@@ -33,11 +33,6 @@ All tests were conducted locally on a MacBook Pro 2017 - 2.8 GHz Intel Core i7 q
 
 The code can be run directly on Julia REPL by installing all the packages listed in [Project.toml](Project.toml) file. 
 
-```julia
-]
-activate .
-```
-
 Most of the scripts come with a `shell` script which can be use in a SLURM cluster environment with the command
 
 ```bash
@@ -46,29 +41,55 @@ sbatch run_"name_of_program"_xPU.sh
 
 All of the provided scripts can be run on CPU or GPU (and some of them on multiple xPUs).
 
-## Mathematical formulation
+## Maxwell's equations
 
-TODO: Describe with simple formulas how the code is implemented
+Maxwell's equations are a set of four fundamental equations that describe the behavior of electric and magnetic fields in classical electromagnetism. These equations, formulated by James Clerk Maxwell in the 19th century, provide a comprehensive framework for understanding the generation and propagation of electromagnetic waves.
 
-Some formulas
+The formulas are given as [5]:
+1. Gauss' law for electricity:
+$$\nabla \cdot \boldsymbol{D} = \rho$$
 
-$\nabla \times \boldsymbol{E} = - \frac{\partial\boldsymbol{B}}{\partial t}$
+2. Gauss' law for magnetism:
+$$\nabla \cdot \boldsymbol{B} = 0$$
 
-$\nabla \times \boldsymbol{H} = J_c + \frac{\partial\boldsymbol{D}}{\partial t}$
 
-$\boldsymbol{D} = \epsilon \boldsymbol{E} $
+3. Faraday's law of induction:
+$$\nabla \times \boldsymbol{E} = - \frac{\partial\boldsymbol{B}}{\partial t}$$
 
-$\boldsymbol{B} = \mu \boldsymbol{H} $
+4. Ampere's law:
+$$\nabla \times \boldsymbol{H} = J_c + \frac{\partial\boldsymbol{D}}{\partial t}$$
 
-Faraday's law
+where:
+- $\boldsymbol{E}$ is the electric field
+- $\boldsymbol{B}$ is the magnetic field
+- $\boldsymbol{D}$ is the electric displacement
+- $\boldsymbol{H}$ is the magnetic field strength
+- $J_c$ is the current density
+
+
+we can additionaly have:
+
+- Isotropic linear dielectric:
+$$\boldsymbol{D} = \epsilon \boldsymbol{E} $$
+
+- Isotropic linear magnetic medium:
+$$\boldsymbol{B} = \mu \boldsymbol{H} $$
+
+where
+- $\epsilon$ is the permittivity
+- $\mu$ is the permeability
+
+
+For the isotropic case we can combine the previous equations and we get:
+
+Faraday's law:
 $$\nabla \times \boldsymbol{E} = - \mu\frac{\partial\boldsymbol{H}}{\partial t} \tag{1} $$
 
-Ampere's law
+Ampere's law:
 $$\nabla \times \boldsymbol{H} = J_c + \epsilon\frac{\partial\boldsymbol{E}}{\partial t} \tag{2}$$
 
+For a more detailed rewiew of electromagnetics consider  [3] (Chapter 2  - Brief Review of Electromagnetics)
 ## Numerical Methods
-
-TODO: Explain finite difference (and the method itself)
 
 To solve the equations it is possible to use the Finite Difference Time Domain Method (FDTD).
 
@@ -77,9 +98,11 @@ This method introduced by Kane S. Yee [1] consists of discretizing the time-depe
 The finite-difference equations derived from this process are addressed in a leapfrog fashion, either through software or hardware. Initially, the electric field vector components within a specific spatial volume are resolved at a particular moment in time. Subsequently, the magnetic field vector components in the same spatial domain are addressed in the subsequent time step. This iterative process continues until the anticipated transient or steady-state electromagnetic field behavior is completely developed [2].
 
 ## 1D FDTD
+
 The goal of this section is to provide a simple code for a Finite Difference Time domain simulator for solving a simple version of the Maxwell equations in 1D.
 
 ### Mathematical Formulation
+
 We assume in this case that the electric field only has a $z$ component.
 
 In this case Faraday's law (Equation 1) can be written as:
@@ -302,3 +325,4 @@ TODO: Write some conclusion and to what extent the code can be extended
 
 [4] Berenger, Jean-Pierre. "A perfectly matched layer for the absorption of electromagnetic waves." Journal of computational physics 114.2 (1994): 185-200 (also [here](./references/APerfectlyMatchedLayerfortheAbsorptionofElectromagneticWaves.pdf))
 
+[5] Hyperphisics.phy-astr.gsu.edu, Maxwell's Equations, http://hyperphysics.phy-astr.gsu.edu/hbase/electric/maxeq.html
