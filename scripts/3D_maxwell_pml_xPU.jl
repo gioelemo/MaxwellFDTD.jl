@@ -1,4 +1,4 @@
-const USE_GPU = false
+const USE_GPU = true
 using ParallelStencil
 using ParallelStencil.FiniteDifferences3D
 @static if USE_GPU
@@ -7,10 +7,9 @@ else
     @init_parallel_stencil(Threads, Float64, 3, inbounds=true)
 end
 
-using Printf, Plots, JLD
+using Printf, Plots, JLD, CUDA
 plot_font = "Computer Modern"
 default(fontfamily=plot_font, framestyle=:box, label=true, grid=true, labelfontsize=11, tickfontsize=11, titlefontsize=13)
-
 
 """
     save_array(Aname,A)
@@ -35,96 +34,142 @@ end
 @views avy(A) = 0.5 .* (A[:, 1:end-1, :] .+ A[:, 2:end, :, :])
 @views avz(A) = 0.5 .* (A[:, :, 1:end-1] .+ A[:, :, 2:end])
 
-function update_Ex!(Ex, Hy, Hz, σ, ε0, dt, dy, dz)
-    #Ex[:, 2:end-1] .+= dt / ε0 .* (-σ .* Ex[:, 2:end-1] .+ diff(Hz, dims=2)./ dy)
-    #@inn_y(Ex) = @inn_y(Ex) .+ dt / ε0 .* (-σ .* @inn_y(Ex) .+ @d_ya(Hz) ./ dy)
+
+#function update_Ex!(Ex, Hy, Hz, σ, ε0, dt, dy, dz)
+@parallel_indices (i, j, k) function update_Ex!(Ex, Hy, Hz, σ, ε0, dt, dy, dz)
+
+    # Single line update (not working)
+    # Ex[:, 2:end-1, 2:end-1] .+= dt / ε0 .* (-σ .* Ex[:, 2:end-1, 2:end-1] .+ diff(Hz, dims=2)./ dy .- diff(Hy, dims=3)./dz)
+
+    # Classical update
+    # Ex[:, 2:end-1, 2:end]   .+= dt / ε0 .* (-σ .* Ex[:, 2:end-1, 2:end] .+ diff(Hz, dims=2)./ dy )
+    # Ex[:, 2:end-1, 1:end-1] .+= dt / ε0 .* (-σ .* Ex[:, 2:end-1, 1:end-1] .+ diff(Hz, dims=2)./ dy )
+    # Ex[:, 2:end-1, 1:end-1 ]  = avx_z(Ex)
+    # Ex[:, 2:end, 2:end-1]   .+= dt / ε0 .* (-σ .* Ex[:, 2:end, 2:end-1] .- diff(Hy, dims=3)./ dz )
+    # Ex[:, 1:end-1, 2:end-1] .+= dt / ε0 .* (-σ .* Ex[:, 1:end-1, 2:end-1] .- diff(Hy, dims=3)./ dz )
+    # Ex[:, 1:end-1, 2:end-1]   = avx_y(Ex)
+
+    nx_pml = size(Hy)[1]
+    ny_pml = size(Hy)[2]
+    nz_pml = size(Hy)[3]
+
+    if j >= 2 && j <= ny_pml - 1 && k >= 2 && k <= nz_pml
+        Ex[i, j, k] = Ex[i, j, k] + dt / ε0 * (-σ * Ex[i, j, k] + @d_ya(Hz)/ dy)
+    end
+
+    if j >= 2 && j <= ny_pml - 1 && k >= 1 && k <= nz_pml-1
+        Ex[i, j, k] = Ex[i, j, k] + dt / ε0 * (-σ * Ex[i, j, k] + @d_ya(Hz) / dy)
+    end
     
-    # println("Ex[:, 2:end-1, 2:end-1]", size(Ex[:, 2:end-1, 2:end-1]))
-    # println("diff(Hz, dims=2)", size(diff(Hz, dims=2)))
-    # println("diff(Hy, dims=3)", size(diff(Hy, dims=3)))
-
-
-    #Ex[:, 2:end-1, 2:end-1] .+= dt / ε0 .* (-σ .* Ex[:, 2:end-1, 2:end-1] .+ diff(Hz, dims=2)./ dy .- diff(Hy, dims=3)./dz)
-
-    Ex[:, 2:end-1, 2:end]   .+= dt / ε0 .* (-σ .* Ex[:, 2:end-1, 2:end] .+ diff(Hz, dims=2)./ dy )
-    Ex[:, 2:end-1, 1:end-1] .+= dt / ε0 .* (-σ .* Ex[:, 2:end-1, 1:end-1] .+ diff(Hz, dims=2)./ dy )
-
-    Ex[:, 2:end-1, 1:end-1 ]  = avx_z(Ex)
-
-    Ex[:, 2:end, 2:end-1]   .+= dt / ε0 .* (-σ .* Ex[:, 2:end, 2:end-1] .- diff(Hy, dims=3)./ dz )
-    Ex[:, 1:end-1, 2:end-1] .+= dt / ε0 .* (-σ .* Ex[:, 1:end-1, 2:end-1] .- diff(Hy, dims=3)./ dz )
+    if j >= 2 && j <= ny_pml - 1 && k >= 1 && k <= nz_pml-1
+        Ex[i, j, k] = 0.5 * (Ex[i, j, k] + Ex[i, j, k + 1])
+    end
     
-    Ex[:, 1:end-1, 2:end-1]   = avx_y(Ex)
+    if j >= 2 && j <= ny_pml && k >= 2 && k <= nz_pml - 1
+        Ex[i, j, k] = Ex[i, j, k] + dt / ε0 * (-σ * Ex[i, j, k] - @d_za(Hy) / dz)
+    end
 
+    if j >= 1 && j <= ny_pml - 1 && k >= 2 && k <= nz_pml - 1
+        Ex[i, j, k] = Ex[i, j, k] + dt / ε0 * (-σ * Ex[i, j, k] - @d_za(Hy) / dz)
+    end
+
+    if j >= 1 && j <= ny_pml - 1 && k >= 2 && k <= nz_pml - 1
+        Ex[i, j, k] = 0.5 * (Ex[i, j, k] + Ex[j, j + 1, k])
+    end
 
     return nothing
 end
 
-function update_Ey!(Ey, Hx, Hz, σ, ε0, dt, dx, dz)
-    #Ey[2:end-1, :] .+= dt / ε0 .* (-σ .* Ey[2:end-1, :] .- diff(Hz, dims=1) ./ dx)
-    #@inn_x(Ey) = @inn_x(Ey) .+ dt / ε0 .* (-σ .* @inn_x(Ey) .- @d_xa(Hz) ./ dx)
+#function update_Ey!(Ey, Hx, Hz, σ, ε0, dt, dx, dz)
+@parallel_indices (i, j, k) function update_Ey!(Ey, Hx, Hz, σ, ε0, dt, dx, dz)
 
-    #Ey[2:end-1, :, 2:end-1] .+= dt / ε0 .* (-σ .* Ey[2:end-1, :, 2:end-1] .+ diff(Hx, dims=3)./dz .- diff(Hz, dims=1) ./ dx)
+    # Single line update (not working)
+    # Ey[2:end-1, :, 2:end-1] .+= dt / ε0 .* (-σ .* Ey[2:end-1, :, 2:end-1] .+ diff(Hx, dims=3)./dz .- diff(Hz, dims=1) ./ dx)
+    
+    # Classical update
+    # Ey[2:end, :, 2:end-1]   .+= dt / ε0 .* (-σ .* Ey[2:end, :, 2:end-1] .+ diff(Hx, dims=3)./dz)
+    # Ey[1:end-1, :, 2:end-1] .+= dt / ε0 .* (-σ .* Ey[1:end-1, :, 2:end-1] .+ diff(Hx, dims=3)./dz)
+    # Ey[1:end-1, :, 2:end-1]   = avy_x(Ey)
+    # Ey[2:end-1, :, 2:end]   .+= dt / ε0 .* (-σ .* Ey[2:end-1, :, 2:end] .- diff(Hz, dims=1)./dx)
+    # Ey[2:end-1, :, 1:end-1] .+= dt / ε0 .* (-σ .* Ey[2:end-1, :, 1:end-1] .- diff(Hz, dims=1)./dx)
+    # Ey[2:end-1, :, 1:end-1]   = avy_z(Ey)
 
-    Ey[2:end, :, 2:end-1]   .+= dt / ε0 .* (-σ .* Ey[2:end, :, 2:end-1] .+ diff(Hx, dims=3)./dz)
-    Ey[1:end-1, :, 2:end-1] .+= dt / ε0 .* (-σ .* Ey[1:end-1, :, 2:end-1] .+ diff(Hx, dims=3)./dz)
+    nx_pml = size(Hz)[1]
+    ny_pml = size(Hz)[2]
+    nz_pml = size(Hz)[3]
 
-    Ey[1:end-1, :, 2:end-1]   = avy_x(Ey)
+    if i >= 2 && i <= nx_pml && k >= 2 && k <= nz_pml - 1
+        Ey[i, j, k] = Ey[i, j, k] + dt / ε0 * (-σ * Ey[i, j, k] + @d_za(Hx) / dz)
+    end
 
-    Ey[2:end-1, :, 2:end]   .+= dt / ε0 .* (-σ .* Ey[2:end-1, :, 2:end] .- diff(Hz, dims=1)./dx)
-    Ey[2:end-1, :, 1:end-1] .+= dt / ε0 .* (-σ .* Ey[2:end-1, :, 1:end-1] .- diff(Hz, dims=1)./dx)
+    if i >= 1 && i <= nx_pml - 1 && k >= 2 && k <= nz_pml - 1
+        Ey[i, j, k] = Ey[i, j, k] + dt / ε0 * (-σ * Ey[i, j, k] + @d_za(Hx) / dz)
+    end
 
-    Ey[2:end-1, :, 1:end-1]   = avy_z(Ey)
+    if i >= 1 && i <= nx_pml - 1 && k >= 2 && k <= nz_pml - 1
+        Ey[i, j, k] = 0.5 * (Ey[i, j, k] + Ey[i + 1, j, k])
+    end
+
+    if i >= 2 && i <= nx_pml - 1 && k >= 2 && k <= nz_pml
+        Ey[i, j, k] = Ey[i, j, k] + dt / ε0 * (-σ * Ey[i, j, k] - @d_xa(Hz) / dx)
+    end
+
+    if i >= 2 && i <= nx_pml - 1 && k >= 1 && k <= nz_pml - 1
+        Ey[i, j, k] = Ey[i, j, k] + dt / ε0 * (-σ * Ey[i, j, k] - @d_xa(Hz) / dx)
+    end
+
+    if i >= 2 && i <= nx_pml - 1 && k >= 1 && k <= nz_pml - 1
+        Ey[i, j, k] = 0.5 * (Ey[i, j, k] + Ey[i, j, k + 1])
+    end
 
     return nothing
 end
 
-function update_Ez!(Ez, Hx, Hy, σ, ε0, dt, dx, dy)
+#function update_Ez!(Ez, Hx, Hy, σ, ε0, dt, dx, dy)
+@parallel_indices (i, j, k) function update_Ez!(Ez, Hx, Hy, σ, ε0, dt, dx, dy)
 
-
-    #Ez[2:end-1, 2:end-1, :] .+= dt / ε0 .* (-σ .* Ez[2:end-1, 2:end-1, :] .+ diff(Hy, dims=1)./dx .- diff(Hx, dims=2) ./ dy)
+    # Single line update (not working)
+    # Ez[2:end-1, 2:end-1, :] .+= dt / ε0 .* (-σ .* Ez[2:end-1, 2:end-1, :] .+ diff(Hy, dims=1)./dx .- diff(Hx, dims=2) ./ dy)
     
-    Ez[2:end-1, 2:end, :]   .+= dt / ε0 .* (-σ .* Ez[2:end-1, 2:end, :] .+ diff(Hy, dims=1)./dx)
-    Ez[2:end-1, 1:end-1, :] .+= dt / ε0 .* (-σ .* Ez[2:end-1, 1:end-1, :] .+ diff(Hy, dims=1)./dx)
+    # Classical update
+    # Ez[2:end-1, 2:end, :]   .+= dt / ε0 .* (-σ .* Ez[2:end-1, 2:end, :] .+ diff(Hy, dims=1)./dx)
+    # Ez[2:end-1, 1:end-1, :] .+= dt / ε0 .* (-σ .* Ez[2:end-1, 1:end-1, :] .+ diff(Hy, dims=1)./dx)
+    # Ez[2:end-1, 1:end-1, :]   = avz_y(Ez)
+    # Ez[2:end, 2:end-1, :]   .+= dt / ε0 .* (-σ .* Ez[2:end, 2:end-1, :] .- diff(Hx, dims=2)./dy)
+    # Ez[1:end-1, 2:end-1, :] .+= dt / ε0 .* (-σ .* Ez[1:end-1, 2:end-1, :] .- diff(Hx, dims=2)./dy)
+    # Ez[1:end-1, 2:end-1, :]   = avz_x(Ez)
 
-    Ez[2:end-1, 1:end-1, :]   = avz_y(Ez)
+    nx_pml = size(Hx)[1]
+    ny_pml = size(Hx)[2]
+    nz_pml = size(Hx)[3]
 
+    if i >= 2 && i <= nx_pml - 1 && j >= 2 && j <= ny_pml
+        Ez[i, j, k] = Ez[i, j, k] + dt / ε0 * (-σ * Ez[i, j, k] + @d_xa(Hy) / dx)
+    end
+
+    if i >= 2 && i <= nx_pml - 1 && j >= 1 && j <= ny_pml - 1
+        Ez[i, j, k] = Ez[i, j, k] + dt / ε0 * (-σ * Ez[i, j, k] + @d_xa(Hy) / dx)
+    end
+
+    if i >= 2 && i <= nx_pml - 1 && j >= 1 && j <= ny_pml - 1
+        Ez[i, j, k] = 0.5 * (Ez[i, j, k] + Ez[i, j + 1, k])
+    end
     
-    Ez[2:end, 2:end-1, :]   .+= dt / ε0 .* (-σ .* Ez[2:end, 2:end-1, :] .- diff(Hx, dims=2)./dy)
-    Ez[1:end-1, 2:end-1, :] .+= dt / ε0 .* (-σ .* Ez[1:end-1, 2:end-1, :] .- diff(Hx, dims=2)./dy)
+    if i >= 2 && i <= nx_pml && j >= 2 && j <= ny_pml - 1
+        Ez[i, j, k] = Ez[i, j, k] + dt / ε0 * (-σ * Ez[i, j, k] - @d_ya(Hx) / dy)
+    end
 
-    Ez[1:end-1, 2:end-1, :]   = avz_x(Ez)
-
+    if i >= 1 && i <= nx_pml - 1 && j >= 2 && j <= ny_pml - 1
+        Ez[i, j, k] = Ez[i, j, k] + dt / ε0 * (-σ * Ez[i, j, k] - @d_ya(Hx) / dy)
+    end
+    
+    if i >= 1 && i <= nx_pml - 1 && j >= 2 && j <= ny_pml - 1
+        Ez[i, j, k] = 0.5 * (Ez[i, j, k] + Ez[i + 1, j, k])
+    end
 
     return nothing
 end
 
-# @parallel_indices (i,j) function update_PML_x!(pml_width, pml_alpha, Ex)
-#     # for i in 1:pml_width
-#     #     Ex[i, :] .= exp(-(pml_width - i) * pml_alpha) .* Ex[i, :]
-#     #     Ex[end - i + 1, :] .= exp(-(pml_width - i) * pml_alpha) .* Ex[end - i + 1, :]
-#     #     Ey[:, i] .= exp(-(pml_width - i) * pml_alpha) .* Ey[:, i]
-#     #     Ey[:, end - i + 1] .= exp(-(pml_width - i) * pml_alpha) .* Ey[:, end - i + 1]
-#     # end
-#     Ex[i, j] = exp(-(pml_width - i) * pml_alpha) * Ex[i, j]
-#     Ex[end - i + 1, j] = exp(-(pml_width - i) * pml_alpha) * Ex[end - i + 1, j]
-
-#     return nothing
-# end
-
-# @parallel_indices (i,j) function update_PML_y!(pml_width, pml_alpha, Ey)
-#     # for i in 1:pml_width
-#     #     Ex[i, :] .= exp(-(pml_width - i) * pml_alpha) .* Ex[i, :]
-#     #     Ex[end - i + 1, :] .= exp(-(pml_width - i) * pml_alpha) .* Ex[end - i + 1, :]
-#     #     Ey[:, i] .= exp(-(pml_width - i) * pml_alpha) .* Ey[:, i]
-#     #     Ey[:, end - i + 1] .= exp(-(pml_width - i) * pml_alpha) .* Ey[:, end - i + 1]
-#     # end
-
-#     Ey[j, i] = exp(-(pml_width - i) * pml_alpha) * Ey[j, i]
-#     Ey[j, end - i + 1] = exp(-(pml_width - i) * pml_alpha) * Ey[j, end - i + 1]
-
-#     return nothing
-# end
 
 function update_PML!(pml_width, pml_alpha, Ex, Ey, Ez)
     
@@ -254,16 +299,20 @@ end
         iframe = 0
     end
 
+    println("init vis okay")
 
 
     # timestepping
     for it in 1:nt
         # Update E
-        update_Ex!(Ex, Hy, Hz, σ, ε0, dt, dy, dz)
+        #update_Ex!(Ex, Hy, Hz, σ, ε0, dt, dy, dz)
+        @parallel (1:nx_pml, 1:ny_pml, 1:nz_pml) update_Ex!(Ex, Hy, Hz, σ, ε0, dt, dy, dz)
         #println("update ex okay")
-        update_Ey!(Ey, Hx, Hz, σ, ε0, dt, dx, dz)
+        #update_Ey!(Ey, Hx, Hz, σ, ε0, dt, dx, dz)
+        @parallel (1:nx_pml, 1:ny_pml, 1:nz_pml) update_Ey!(Ey, Hx, Hz, σ, ε0, dt, dx, dz)
         #println("update ey okay")
-        update_Ez!(Ez, Hx, Hy, σ, ε0, dt, dx, dy)
+        #update_Ez!(Ez, Hx, Hy, σ, ε0, dt, dx, dy)
+        @parallel (1:nx_pml, 1:ny_pml, 1:nz_pml) update_Ez!(Ez, Hx, Hy, σ, ε0, dt, dx, dy)
         #println("update ez okay")
 
         # Update PML
@@ -328,4 +377,4 @@ end
 #maxwell(256, 15000, 100, 0.1; do_visu=true, do_test=false)
 
 
-maxwell(100,800,100,0.0; do_visu=false, do_test=false)
+maxwell(100,100,100,0.1; do_visu=false, do_test=false)
