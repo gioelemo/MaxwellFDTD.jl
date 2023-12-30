@@ -391,7 +391,7 @@ TODO: results
 
 ## Testing
 
-For all implementations (1D, 2D, 3D) we perform some unit and reference testing. For more details of the testing we refer directly to the test files [test_1D](./test/test1D.jl), [test_2D](./test/test2D.jl), [test_3D](./test/test3D.jl)
+For all implementations (1D, 2D, 3D) we perform some unit and reference testing. For more details of the testing we refer directly to the test files [test1D.jl](./test/test1D.jl), [test2D.jl](./test/test2D.jl), [test3D.jl](./test/test3D.jl)
 
 ## Results and conclusions
 
