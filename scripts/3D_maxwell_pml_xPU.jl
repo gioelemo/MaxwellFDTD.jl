@@ -126,6 +126,21 @@ end
 #     return nothing
 # end
 
+function update_PML!(pml_width, pml_alpha, Ex, Ey, Ez)
+    
+    for i in 1:pml_width
+        Ex[i, :, :] .= exp(-(pml_width - i) * pml_alpha) .* Ex[i, :, :]
+        Ex[end - i + 1, :, :] .= exp(-(pml_width - i) * pml_alpha) .* Ex[end - i + 1, :, :]
+        Ey[:, i, :] .= exp(-(pml_width - i) * pml_alpha) .* Ey[:, i, :]
+        Ey[:, end - i + 1, :] .= exp(-(pml_width - i) * pml_alpha) .* Ey[:, end - i + 1, :]
+        Ez[:, :, i] .= exp(-(pml_width - i) * pml_alpha) .* Ez[:, :, i]
+        Ez[:, :, end - i + 1, :] .= exp(-(pml_width - i) * pml_alpha) .* Ez[:, :, end - i + 1, :]
+    end
+    
+    return nothing
+end
+
+
 function update_Hx!(Hx, Ey, Ez, σ, μ0, dt, dy, dz)
     #Hz .+= dt / μ0 .* (-σ .* Hz .+ diff(Ex, dims=2) ./ dy .- diff(Ey, dims=1) ./ dx)
     #@all(Hz) = @all(Hz) .+ dt / μ0 .* (-σ .* @all(Hz) .+ @d_ya(Ex) ./ dy .- @d_xa(Ey) ./ dx)
@@ -191,7 +206,7 @@ end
     nx, ny, nz = nz_ , nz_ , nz_
 
     # PML parameters
-    pml_width = 0
+    pml_width = 5
     pml_alpha = pml_alpha_
      
     # Extend the grid
@@ -252,6 +267,7 @@ end
         #println("update ez okay")
 
         # Update PML
+        update_PML!(pml_width, pml_alpha, Ex, Ey, Ez)
         #@parallel (1:pml_width, 1:size(Ex, 2)) update_PML_x!(pml_width, pml_alpha, Ex)
         #@parallel (1:pml_width, 1:size(Ey, 1)) update_PML_y!(pml_width, pml_alpha, Ey)
 
@@ -312,4 +328,4 @@ end
 #maxwell(256, 15000, 100, 0.1; do_visu=true, do_test=false)
 
 
-maxwell(100,100,100,0.0; do_visu=false, do_test=false)
+maxwell(100,800,100,0.0; do_visu=false, do_test=false)
