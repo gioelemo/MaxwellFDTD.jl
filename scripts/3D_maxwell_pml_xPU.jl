@@ -22,6 +22,18 @@ function save_array(Aname,A)
     out = open(fname,"w"); write(out,A); close(out)
 end
 
+@views avx_z(A) = 0.5 .* (A[:, 2:end-1, 1:end-1] .+ A[:, 2:end-1, 2:end])
+@views avx_y(A) = 0.5 .* (A[:, 1:end-1, 2:end-1] .+ A[:, 2:end, 2:end-1])
+
+@views avy_x(A) = 0.5 .* (A[1:end-1, :, 2:end-1] .+ A[2:end, :, 2:end-1])
+@views avy_z(A) = 0.5 .* (A[2:end-1, :, 1:end-1] .+ A[2:end-1, :, 2:end])
+
+@views avz_x(A) = 0.5 .* (A[1:end-1, 2:end-1, :] .+ A[2:end, 2:end-1, :])
+@views avz_y(A) = 0.5 .* (A[2:end-1, 1:end-1, :] .+ A[2:end-1, 2:end, :])
+
+@views avx(A) = 0.5 .* (A[1:end-1, :, :] .+ A[2:end, :, :])
+@views avy(A) = 0.5 .* (A[:, 1:end-1, :] .+ A[:, 2:end, :, :])
+@views avz(A) = 0.5 .* (A[:, :, 1:end-1] .+ A[:, :, 2:end])
 
 function update_Ex!(Ex, Hy, Hz, σ, ε0, dt, dy, dz)
     #Ex[:, 2:end-1] .+= dt / ε0 .* (-σ .* Ex[:, 2:end-1] .+ diff(Hz, dims=2)./ dy)
@@ -34,12 +46,17 @@ function update_Ex!(Ex, Hy, Hz, σ, ε0, dt, dy, dz)
 
     #Ex[:, 2:end-1, 2:end-1] .+= dt / ε0 .* (-σ .* Ex[:, 2:end-1, 2:end-1] .+ diff(Hz, dims=2)./ dy .- diff(Hy, dims=3)./dz)
 
-    #Ex[:, 2:end-1, 2:end] .+= dt / ε0 .* (-σ .* Ex[:, 2:end-1, 2:end] .+ diff(Hz, dims=2)./ dy )
-    #Ex[:, 2:end, 2:end-1] .+= dt / ε0 .* (-σ .* Ex[:, 2:end, 2:end-1] .- diff(Hy, dims=3)./ dz )
-
+    Ex[:, 2:end-1, 2:end]   .+= dt / ε0 .* (-σ .* Ex[:, 2:end-1, 2:end] .+ diff(Hz, dims=2)./ dy )
     Ex[:, 2:end-1, 1:end-1] .+= dt / ε0 .* (-σ .* Ex[:, 2:end-1, 1:end-1] .+ diff(Hz, dims=2)./ dy )
+
+    Ex[:, 2:end-1, 1:end-1 ]  = avx_z(Ex)
+
+    Ex[:, 2:end, 2:end-1]   .+= dt / ε0 .* (-σ .* Ex[:, 2:end, 2:end-1] .- diff(Hy, dims=3)./ dz )
     Ex[:, 1:end-1, 2:end-1] .+= dt / ε0 .* (-σ .* Ex[:, 1:end-1, 2:end-1] .- diff(Hy, dims=3)./ dz )
     
+    Ex[:, 1:end-1, 2:end-1]   = avx_y(Ex)
+
+
     return nothing
 end
 
@@ -49,11 +66,15 @@ function update_Ey!(Ey, Hx, Hz, σ, ε0, dt, dx, dz)
 
     #Ey[2:end-1, :, 2:end-1] .+= dt / ε0 .* (-σ .* Ey[2:end-1, :, 2:end-1] .+ diff(Hx, dims=3)./dz .- diff(Hz, dims=1) ./ dx)
 
-    #Ey[2:end, :, 2:end-1] .+= dt / ε0 .* (-σ .* Ey[2:end, :, 2:end-1] .+ diff(Hx, dims=3)./dz)
-    #Ey[2:end-1, :, 2:end] .+= dt / ε0 .* (-σ .* Ey[2:end-1, :, 2:end] .- diff(Hz, dims=1)./dx)
-
+    Ey[2:end, :, 2:end-1]   .+= dt / ε0 .* (-σ .* Ey[2:end, :, 2:end-1] .+ diff(Hx, dims=3)./dz)
     Ey[1:end-1, :, 2:end-1] .+= dt / ε0 .* (-σ .* Ey[1:end-1, :, 2:end-1] .+ diff(Hx, dims=3)./dz)
+
+    Ey[1:end-1, :, 2:end-1]   = avy_x(Ey)
+
+    Ey[2:end-1, :, 2:end]   .+= dt / ε0 .* (-σ .* Ey[2:end-1, :, 2:end] .- diff(Hz, dims=1)./dx)
     Ey[2:end-1, :, 1:end-1] .+= dt / ε0 .* (-σ .* Ey[2:end-1, :, 1:end-1] .- diff(Hz, dims=1)./dx)
+
+    Ey[2:end-1, :, 1:end-1]   = avy_z(Ey)
 
     return nothing
 end
@@ -63,11 +84,17 @@ function update_Ez!(Ez, Hx, Hy, σ, ε0, dt, dx, dy)
 
     #Ez[2:end-1, 2:end-1, :] .+= dt / ε0 .* (-σ .* Ez[2:end-1, 2:end-1, :] .+ diff(Hy, dims=1)./dx .- diff(Hx, dims=2) ./ dy)
     
-    #Ez[2:end-1, 2:end, :] .+= dt / ε0 .* (-σ .* Ez[2:end-1, 2:end, :] .+ diff(Hy, dims=1)./dx)
-    #Ez[2:end, 2:end-1, :] .+= dt / ε0 .* (-σ .* Ez[2:end, 2:end-1, :] -+ diff(Hx, dims=2)./dy)
-
+    Ez[2:end-1, 2:end, :]   .+= dt / ε0 .* (-σ .* Ez[2:end-1, 2:end, :] .+ diff(Hy, dims=1)./dx)
     Ez[2:end-1, 1:end-1, :] .+= dt / ε0 .* (-σ .* Ez[2:end-1, 1:end-1, :] .+ diff(Hy, dims=1)./dx)
-    Ez[1:end-1, 2:end-1, :] .+= dt / ε0 .* (-σ .* Ez[1:end-1, 2:end-1, :] -+ diff(Hx, dims=2)./dy)
+
+    Ez[2:end-1, 1:end-1, :]   = avz_y(Ez)
+
+    
+    Ez[2:end, 2:end-1, :]   .+= dt / ε0 .* (-σ .* Ez[2:end, 2:end-1, :] .- diff(Hx, dims=2)./dy)
+    Ez[1:end-1, 2:end-1, :] .+= dt / ε0 .* (-σ .* Ez[1:end-1, 2:end-1, :] .- diff(Hx, dims=2)./dy)
+
+    Ez[1:end-1, 2:end-1, :]   = avz_x(Ez)
+
 
     return nothing
 end
@@ -109,9 +136,10 @@ function update_Hx!(Hx, Ey, Ez, σ, μ0, dt, dy, dz)
 
     #Hx .+= dt / μ0 .* (-σ .* Hx .+ diff(Ey, dims=3) ./ dz .- diff(Ez, dims=2) ./ dy)
 
-    #Hx .+= dt / μ0 .* (-σ .* Hx .+ diff(Ey, dims=3)[1:end-1,:,:] ./ dz .- diff(Ez, dims=2)[1:end-1,:,:] ./ dy)
-
+    Hx .+= dt / μ0 .* (-σ .* Hx .+ diff(Ey, dims=3)[1:end-1,:,:] ./ dz .- diff(Ez, dims=2)[1:end-1,:,:] ./ dy)
     Hx .+= dt / μ0 .* (-σ .* Hx .+ diff(Ey, dims=3)[2:end,:,:] ./ dz .- diff(Ez, dims=2)[2:end,:,:] ./ dy)
+
+    Hx = avx(Hx)
 
     return nothing
 end
@@ -126,9 +154,10 @@ function update_Hy!(Hy, Ex, Ez, σ, μ0, dt, dx, dz)
 
     #Hy .+= dt / μ0 .* (-σ .* Hy .+ diff(Ez, dims=1) ./ dx .- diff(Ex, dims=3) ./ dz)
 
-    #Hy .+= dt / μ0 .* (-σ .* Hy .+ diff(Ez, dims=1)[:,1:end-1,:] ./ dx .- diff(Ex, dims=3)[:,1:end-1,:] ./ dz)
-
+    Hy .+= dt / μ0 .* (-σ .* Hy .+ diff(Ez, dims=1)[:,1:end-1,:] ./ dx .- diff(Ex, dims=3)[:,1:end-1,:] ./ dz)
     Hy .+= dt / μ0 .* (-σ .* Hy .+ diff(Ez, dims=1)[:,2:end,:] ./ dx .- diff(Ex, dims=3)[:,2:end,:] ./ dz)
+
+    Hy = avy(Hy)
 
     return nothing
 end
@@ -144,8 +173,10 @@ function update_Hz!(Hz, Ex, Ey, σ, μ0, dt, dy, dx)
 
     #Hz .+= dt / μ0 .* (-σ .* Hz .+ diff(Ex, dims=2) ./ dy .- diff(Ey, dims=1) ./ dx)
 
-    #Hz .+= dt / μ0 .* (-σ .* Hz .+ diff(Ex, dims=2)[:,:,1:end-1] ./ dy .- diff(Ey, dims=1)[:,:,1:end-1] ./ dx)
+    Hz .+= dt / μ0 .* (-σ .* Hz .+ diff(Ex, dims=2)[:,:,1:end-1] ./ dy .- diff(Ey, dims=1)[:,:,1:end-1] ./ dx)
     Hz .+= dt / μ0 .* (-σ .* Hz .+ diff(Ex, dims=2)[:,:,2:end] ./ dy .- diff(Ey, dims=1)[:,:,2:end] ./ dx)
+
+    Hz = avz(Hz)
     return nothing
 end
     
@@ -188,6 +219,9 @@ end
 
 
     Hx = Data.Array([exp(-(xc[ix] - lx / 2)^2 - (yc[iy] - ly / 2)^2 - (zc[iz] - lz / 2)^2) for ix = 1:nx_pml, iy = 1:ny_pml, iz = 1:nz_pml])
+    #Hx = Data.Array([exp(-(xc[ix])^2 - (yc[iy])^2 - (zc[iz])^2) for ix = 1:nx_pml, iy = 1:ny_pml, iz = 1:nz_pml])
+
+    
     Hy = copy(Hx)
     Hz = copy(Hx)
 
@@ -211,11 +245,11 @@ end
     for it in 1:nt
         # Update E
         update_Ex!(Ex, Hy, Hz, σ, ε0, dt, dy, dz)
-        println("update ex okay")
+        #println("update ex okay")
         update_Ey!(Ey, Hx, Hz, σ, ε0, dt, dx, dz)
-        println("update ey okay")
+        #println("update ey okay")
         update_Ez!(Ez, Hx, Hy, σ, ε0, dt, dx, dy)
-        println("update ez okay")
+        #println("update ez okay")
 
         # Update PML
         #@parallel (1:pml_width, 1:size(Ex, 2)) update_PML_x!(pml_width, pml_alpha, Ex)
@@ -223,11 +257,11 @@ end
 
         # Update H
         update_Hx!(Hx, Ey, Ez, σ, μ0, dt, dy, dz)
-        println("update hx okay")
+        #println("update hx okay")
         update_Hy!(Hy, Ex, Ez, σ, μ0, dt, dx, dz)
-        println("update hy okay")
+        #println("update hy okay")
         update_Hz!(Hz, Ex, Ey, σ, μ0, dt, dy, dx)
-        println("update hz okay")
+        #println("update hz okay")
         
         if it % nout == 0 && do_visu == true
             # Create a heatmap
@@ -252,6 +286,10 @@ end
     save_array("../docs/out_Ey",convert.(Float32,Array(Ey)))
     save_array("../docs/out_Ez",convert.(Float32,Array(Ez)))
 
+    save_array("../docs/out_Hx",convert.(Float32,Array(Hx)))
+    save_array("../docs/out_Hy",convert.(Float32,Array(Hy)))
+    save_array("../docs/out_Hz",convert.(Float32,Array(Hz)))
+
     # testing
     if do_test == true
         if USE_GPU
@@ -274,4 +312,4 @@ end
 #maxwell(256, 15000, 100, 0.1; do_visu=true, do_test=false)
 
 
-maxwell(101,1000,100,0.0; do_visu=false, do_test=false)
+maxwell(100,100,100,0.0; do_visu=false, do_test=false)
