@@ -399,7 +399,7 @@ $$
 E_y += \frac{\Delta t}{\varepsilon} \left( -\sigma \cdot E_y + \frac{\partial H_x}{\partial z} - \frac{\partial H_z}{\partial x}\right)
 $$
 
-3. For $E_z$ (Electric field in $y$-direction from Equation (xx))
+3. For $E_z$ (Electric field in $z$-direction from Equation (xx))
 
 $$
 E_z += \frac{\Delta t}{\varepsilon} \left( -\sigma \cdot E_y + \frac{\partial H_y}{\partial x} - \frac{\partial H_x}{\partial y}\right)
