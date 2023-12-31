@@ -385,6 +385,44 @@ Similar to the previous case we observe that some waves are partially absorbed b
 
 TODO: Explain formulas in 3D 
 
+We can transform the previous equation using finite difference into the following set of 3D update equations:
+
+1. For $E_x$ (Electric field in $x$-direction from Equation (xxx))
+
+$$
+E_x += \frac{\Delta t}{\varepsilon} \left( -\sigma \cdot E_x +  \frac{\partial H_z}{\partial y} -  \frac{\partial H_y}{\partial z}\right)
+$$
+
+2. For $E_y$ (Electric field in $y$-direction from Equation (xx))
+
+$$
+E_y += \frac{\Delta t}{\varepsilon} \left( -\sigma \cdot E_y + \frac{\partial H_x}{\partial z} - \frac{\partial H_z}{\partial x}\right)
+$$
+
+3. For $E_z$ (Electric field in $y$-direction from Equation (xx))
+
+$$
+E_z += \frac{\Delta t}{\varepsilon} \left( -\sigma \cdot E_y + \frac{\partial H_y}{\partial x} - \frac{\partial H_x}{\partial y}\right)
+$$
+
+4. For $H_x$ (Magnetic field in $x$-direction from Equation (xxx))
+
+$$
+H_x +=  \frac{\Delta t}{\mu}\left(-\sigma \cdot H_z + \frac{\partial E_y}{\partial z} - \frac{\partial E_z}{\partial y}\right)
+$$
+
+5. For $H_y$ (Magnetic field in $y$-direction from Equation (xxx))
+
+$$
+H_y +=  \frac{\Delta t}{\mu}\left(-\sigma \cdot H_z + \frac{\partial E_z}{\partial x} - \frac{\partial E_x}{\partial z}\right)
+$$
+
+6. For $H_z$ (Magnetic field in $z$-direction from Equation (xxx))
+
+$$
+H_z +=  \frac{\Delta t}{\mu}\left(-\sigma \cdot H_z + \frac{\partial E_x}{\partial y} - \frac{\partial E_y}{\partial x}\right)
+$$
+
 ### Code
 
 TODO: results
