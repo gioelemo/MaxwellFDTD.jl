@@ -427,6 +427,14 @@ $$
 
 TODO: results
 
+|![](./docs/Ex_field_3D-v1.png)|![](./docs/Ey_field_3D-v1.png)|![](./docs/Ez_field_3D-v1.png)|
+|:--:| :--: | :--: |
+| *Ex field at nz/2*| *Ey field at nz/2* | *Ez field at nz/2* |
+
+|![](./docs/Hx_field_3D-v1.png)|![](./docs/Hy_field_3D-v1.png)|![](./docs/Hz_field_3D-v1.png)|
+|:--:| :--: | :--: |
+| *Hx field at nz/2*| *Hy field at nz/2* | *Hz field at nz/2-1* |
+
 ## Testing
 
 For all implementations (1D, 2D, 3D) we perform some unit and reference testing. For more details of the testing we refer directly to the test files [test1D.jl](./test/test1D.jl), [test2D.jl](./test/test2D.jl), [test3D.jl](./test/test3D.jl)
