@@ -51,35 +51,72 @@ function update_Hz!(Hz, dt, μ0, σ, Ex, Ey, dx, dy)
     return nothing
 end
 
+# function update_PML!(pml_width, pml_alpha, Ex, Ey, Ez)
+#     for i in 1:pml_width
+#         Ex[i, :, :] .= exp(-(pml_width - i) * pml_alpha) .* Ex[i, :, :]
+#         Ex[end - i + 1, :, :] .= exp(-(pml_width - i) * pml_alpha) .* Ex[end - i + 1, :, :]
+#         Ey[:, i, :] .= exp(-(pml_width - i) * pml_alpha) .* Ey[:, i, :]
+#         Ey[:, end - i + 1, :] .= exp(-(pml_width - i) * pml_alpha) .* Ey[:, end - i + 1 , :]
+#         Ez[:, :, i] .= exp(-(pml_width - i) * pml_alpha) .* Ez[:, :, i]
+#         Ez[:, :, end - i + 1] .= exp(-(pml_width - i) * pml_alpha) .* Ez[:, :, end - i + 1]
+#     end
+#     return nothing
+# end
+
+@parallel_indices (i,j,k) function update_PML_x!(pml_width, pml_alpha, Ex)
+    Ex[i, j, k] = exp(-(pml_width - i) * pml_alpha) * Ex[i, j, k]
+    Ex[end - i + 1, j, k] = exp(-(pml_width - i) * pml_alpha) * Ex[end - i + 1, j, k]
+    return nothing
+end
+
+@parallel_indices (i,j,k) function update_PML_y!(pml_width, pml_alpha, Ey)
+    Ey[i, j, k] = exp(-(pml_width - j) * pml_alpha) * Ey[i, j, k]
+    Ey[i, end - j + 1, k] = exp(-(pml_width - j) * pml_alpha) * Ey[i, end - j + 1 , k]
+    return nothing
+end
+
+@parallel_indices (i,j,k) function update_PML_z!(pml_width, pml_alpha, Ez)
+    Ez[i, j, k] = exp(-(pml_width - k) * pml_alpha) * Ez[i, j, k]
+    Ez[i, j, end - k + 1] = exp(-(pml_width - k) * pml_alpha) * Ez[i, j, end - k + 1]
+    return nothing
+end
+
 @views function maxwell()
     # physics
     lx, ly, lz = 40.0, 40.0, 40.0
     ε0 = 1.0
     μ0 = 1.0
     σ = 1.0
+
+    pml_width = 10
+    pml_alpha = 0.1
     # numerics
     nx, ny, nz = 100, 100, 100
-    dx, dy, dz = lx / nx, ly / ny, lz / nz
-    xc = LinRange(-lx / 2 + dx / 2, lx / 2 - dx / 2, nx)
-    yc = LinRange(-ly / 2 + dy / 2, ly / 2 - dy / 2, ny)
-    zc = LinRange(-lz / 2 + dz / 2, lz / 2 - dz / 2, nz)
+
+    # Extend the grid
+    nx_pml, ny_pml, nz_pml = nx + 2 * pml_width, ny + 2 * pml_width, nz + 2 * pml_width
+
+    dx, dy, dz = lx / nx_pml, ly / ny_pml, lz / nz_pml
+    xc = LinRange(-lx / 2 + dx / 2, lx / 2 - dx / 2, nx_pml)
+    yc = LinRange(-ly / 2 + dy / 2, ly / 2 - dy / 2, ny_pml)
+    zc = LinRange(-lz / 2 + dz / 2, lz / 2 - dz / 2, nz_pml)
     dt = min(dx, dy, dz)^2 / (1 / ε0 / μ0) / 4.1
     nt = 1000
     nout = 1e2
     # initial conditions
-    Ex = @zeros(nx, ny + 1, nz + 1)
-    Ey = @zeros(nx + 1, ny, nz + 1)
-    Ez = @zeros(nx + 1, ny + 1, nz)
+    Ex = @zeros(nx_pml, ny_pml + 1, nz_pml + 1)
+    Ey = @zeros(nx_pml + 1, ny_pml, nz_pml + 1)
+    Ez = @zeros(nx_pml + 1, ny_pml + 1, nz_pml)
     
-    Hx = @zeros(nx - 1, ny, nz)
-    Hy = @zeros(nx, ny  - 1, nz)
-    Hz = @zeros(nx, ny, nz - 1)
+    Hx = @zeros(nx_pml - 1, ny_pml, nz_pml)
+    Hy = @zeros(nx_pml, ny_pml  - 1, nz_pml)
+    Hz = @zeros(nx_pml, ny_pml, nz_pml - 1)
 
     #println(size(Ex))
 
-    Hx = Data.Array([exp(-(xc[ix] - lx / 2)^2 - (yc[iy] - ly / 2)^2 - (zc[iz] - lz / 2)^2) for ix = 1:nx-1, iy = 1:ny, iz = 1:nz])
-    Hy = Data.Array([exp(-(xc[ix] - lx / 2)^2 - (yc[iy] - ly / 2)^2 - (zc[iz] - lz / 2)^2) for ix = 1:nx, iy = 1:ny-1, iz = 1:nz])
-    Hz = Data.Array([exp(-(xc[ix] - lx / 2)^2 - (yc[iy] - ly / 2)^2 - (zc[iz] - lz / 2)^2) for ix = 1:nx, iy = 1:ny, iz = 1:nz-1])
+    Hx = Data.Array([exp(-(xc[ix] - lx / 2)^2 - (yc[iy] - ly / 2)^2 - (zc[iz] - lz / 2)^2) for ix = 1:nx_pml-1, iy = 1:ny_pml, iz = 1:nz_pml])
+    Hy = Data.Array([exp(-(xc[ix] - lx / 2)^2 - (yc[iy] - ly / 2)^2 - (zc[iz] - lz / 2)^2) for ix = 1:nx_pml, iy = 1:ny_pml-1, iz = 1:nz_pml])
+    Hz = Data.Array([exp(-(xc[ix] - lx / 2)^2 - (yc[iy] - ly / 2)^2 - (zc[iz] - lz / 2)^2) for ix = 1:nx_pml, iy = 1:ny_pml, iz = 1:nz_pml-1])
 
     #Hx = [exp(-(xc[ix])^2 - (yc[iy])^2 - (zc[iz])^2) for ix = 1:nx-1, iy = 1:ny, iz = 1:nz]
     #Hy = [exp(-(xc[ix])^2 - (yc[iy])^2 - (zc[iz])^2) for ix = 1:nx, iy = 1:ny-1, iz = 1:nz]
@@ -89,7 +126,8 @@ end
     for it in 1:nt
 
         #println(size(Ex))
-        @parallel (1:size(Ex,1), 2:size(Ex, 2) - 2, 2:size(Ex, 3) - 2) update_Ex!(Ex, dt, ε0, σ, Hy, Hz, dy, dz)
+        #@parallel (1:size(Ex,1), 2:size(Ex, 2) - 2, 2:size(Ex, 3) - 2) update_Ex!(Ex, dt, ε0, σ, Hy, Hz, dy, dz)
+        update_Ex!(Ex, dt, ε0, σ, Hy, Hz, dy, dz)
         #@synchronize()
         #println("ex ok")
         
@@ -98,6 +136,13 @@ end
 
         update_Ez!(Ez, dt, ε0, σ, Hx, Hy, dx, dy)
         #println("ez ok")
+
+        #update_PML!(pml_width, pml_alpha, Ex, Ey, Ez)
+        if pml_width > 0
+            @parallel (1:pml_width, 1:size(Ex, 2), 1:size(Ex,3)) update_PML_x!(pml_width, pml_alpha, Ex)
+            @parallel (1:size(Ey, 1), 1:pml_width, 1:size(Ey,3)) update_PML_y!(pml_width, pml_alpha, Ey)
+            @parallel (1:size(Ez, 1), 1:size(Ez,2), 1:pml_width) update_PML_z!(pml_width, pml_alpha, Ez)
+        end
 
         update_Hx!(Hx, dt, μ0, σ, Ey, Ez, dy, dz)
         #println("Hx ok")
