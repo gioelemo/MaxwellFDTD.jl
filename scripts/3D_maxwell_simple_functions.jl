@@ -19,7 +19,6 @@ function save_array(Aname,A)
     out = open(fname,"w"); write(out,A); close(out)
 end
 
-#@parallel_indices (i, j, k) function update_Ex!(Ex, dt, ε0, σ, Hy, Hz, dy, dz)
 function update_Ex!(Ex, dt, ε0, σ, Hy, Hz, dy, dz)
     Ex[:, 2:end-1, 2:end-1] .+= dt / ε0 .* (-σ .* Ex[:, 2:end-1, 2:end-1] .+ diff(Hz, dims=2)./ dy .- diff(Hy, dims=3)./dz)
     return nothing    
@@ -57,14 +56,13 @@ end
     μ0 = 1.0
     σ = 1.0
     # numerics
-    nx, ny, nz = 5, 5, 5
+    nx, ny, nz = 100, 100, 100
     dx, dy, dz = lx / nx, ly / ny, lz / nz
     xc = LinRange(-lx / 2 + dx / 2, lx / 2 - dx / 2, nx)
     yc = LinRange(-ly / 2 + dy / 2, ly / 2 - dy / 2, ny)
     zc = LinRange(-lz / 2 + dz / 2, lz / 2 - dz / 2, nz)
     dt = min(dx, dy, dz)^2 / (1 / ε0 / μ0) / 4.1 #4.1
-    #println(dt)
-    nt = 10
+    nt = 1000
     nout = 1e2
     # initial conditions
     Ex = @zeros(nx, ny + 1, nz + 1)
@@ -74,9 +72,6 @@ end
     Hx = @zeros(nx - 1, ny, nz)
     Hy = @zeros(nx, ny  - 1, nz)
     Hz = @zeros(nx, ny, nz - 1)
-
-
-    #println(size(Ex))
 
     Hx = Data.Array([exp(-(xc[ix] - lx / 2)^2 - (yc[iy] - ly / 2)^2 - (zc[iz] - lz / 2)^2) for ix = 1:nx-1, iy = 1:ny, iz = 1:nz])
     Hy = Data.Array([exp(-(xc[ix] - lx / 2)^2 - (yc[iy] - ly / 2)^2 - (zc[iz] - lz / 2)^2) for ix = 1:nx, iy = 1:ny-1, iz = 1:nz])
@@ -89,10 +84,7 @@ end
     println("init ok")
     for it in 1:nt
 
-        #println(size(Ex))
         update_Ex!(Ex, dt, ε0, σ, Hy, Hz, dy, dz)
-        println(sum(Ex))
-        #@synchronize()
         #println("ex ok")
         
         update_Ey!(Ey, dt, ε0, σ, Hx, Hz, dx, dz)

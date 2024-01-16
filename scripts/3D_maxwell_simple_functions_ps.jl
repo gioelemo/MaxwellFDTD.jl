@@ -21,9 +21,6 @@ end
 
 @parallel_indices (i, j, k) function update_Ex!(Ex, dt, ε0, σ, Hy, Hz, dy, dz)
     Ex[i, j + 1, k + 1] = Ex[i, j + 1, k + 1] + dt / ε0 * (-σ * Ex[i, j + 1, k + 1] + @d_ya(Hz) / dy - @d_za(Hy) / dz)
-
-    #Ex[i, j, k] = Ex[i, j, k] + dt / ε0 * (-σ * Ex[i, j, k] + (Hz[i,j,k]-Hz[i,j-1,k]) / dy - (Hy[i,j,k]-Hy[i,j,k-1]) / dz)
-
     return nothing    
 end
 
@@ -65,7 +62,6 @@ end
     yc = LinRange(-ly / 2 + dy / 2, ly / 2 - dy / 2, ny)
     zc = LinRange(-lz / 2 + dz / 2, lz / 2 - dz / 2, nz)
     dt = min(dx, dy, dz)^2 / (1 / ε0 / μ0) / 4.1
-    #println(dt)
     nt = 1000
     nout = 1e2
     # initial conditions
@@ -77,10 +73,6 @@ end
     Hy = @zeros(nx, ny  - 1, nz)
     Hz = @zeros(nx, ny, nz - 1)
 
-    #println(eltype(Hz))
-
-    #println(size(Ex))
-
     Hx = Data.Array([exp(-(xc[ix] - lx / 2)^2 - (yc[iy] - ly / 2)^2 - (zc[iz] - lz / 2)^2) for ix = 1:nx-1, iy = 1:ny, iz = 1:nz])
     Hy = Data.Array([exp(-(xc[ix] - lx / 2)^2 - (yc[iy] - ly / 2)^2 - (zc[iz] - lz / 2)^2) for ix = 1:nx, iy = 1:ny-1, iz = 1:nz])
     Hz = Data.Array([exp(-(xc[ix] - lx / 2)^2 - (yc[iy] - ly / 2)^2 - (zc[iz] - lz / 2)^2) for ix = 1:nx, iy = 1:ny, iz = 1:nz-1])
@@ -88,18 +80,11 @@ end
     #Hx = [exp(-(xc[ix])^2 - (yc[iy])^2 - (zc[iz])^2) for ix = 1:nx-1, iy = 1:ny, iz = 1:nz]
     #Hy = [exp(-(xc[ix])^2 - (yc[iy])^2 - (zc[iz])^2) for ix = 1:nx, iy = 1:ny-1, iz = 1:nz]
     #Hz = [exp(-(xc[ix])^2 - (yc[iy])^2 - (zc[iz])^2) for ix = 1:nx, iy = 1:ny, iz = 1:nz-1]
-    #println(eltype(Hz))
 
     println("init ok")
     for it in 1:nt
 
-        #println(size(Ex))
-        #@parallel (1:size(Ex,1), 2:size(Ex, 2) - 2, 2:size(Ex, 3) - 2) update_Ex!(Ex, dt, ε0, σ, Hy, Hz, dy, dz)
-        @parallel (1:size(Ex,1), 1:size(Ex, 2)-2, 1:size(Ex, 3) - 2) update_Ex!(Ex, dt, ε0, σ, Hy, Hz, dy, dz)
-
-
-        #@synchronize()
-        #println(sum(Ex))
+        @parallel (1:size(Ex, 1), 1:size(Ex, 2)-2, 1:size(Ex, 3) - 2) update_Ex!(Ex, dt, ε0, σ, Hy, Hz, dy, dz)
         #println("ex ok")
         
         update_Ey!(Ey, dt, ε0, σ, Hx, Hz, dx, dz)
