@@ -144,13 +144,14 @@ Use the Finite Difference Time Domain (FDTD) solver to solve Maxwell's equations
         @parallel update_Ey!(Ey, Hz, σ, ε0, dt, dx)
 
         # Update PML
-        @parallel (1:pml_width, 1:size(Ex, 2)) update_PML_x!(pml_width, pml_alpha, Ex)
-        @parallel (1:pml_width, 1:size(Ey, 1)) update_PML_y!(pml_width, pml_alpha, Ey)
-
-        # Update H
         if pml_width > 0
-            @parallel update_Hz!(Hz, Ex, Ey, σ, μ0, dt, dy, dx)
+            @parallel (1:pml_width, 1:size(Ex, 2)) update_PML_x!(pml_width, pml_alpha, Ex)
+            @parallel (1:pml_width, 1:size(Ey, 1)) update_PML_y!(pml_width, pml_alpha, Ey)
         end
+        
+        # Update H
+        @parallel update_Hz!(Hz, Ex, Ey, σ, μ0, dt, dy, dx)
+        
 
         if it % nout == 0 && do_visu == true
             # Create a heatmap

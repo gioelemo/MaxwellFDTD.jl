@@ -275,3 +275,5 @@ end
 
 #maxwell(nx_, ny_, nz_, nt_, pml_alpha_; do_visu=false, do_check=true, do_test=true)
 maxwell(100, 100, 100, 1000, 0.1; do_visu=true, do_test=false)
+
+#maxwell(100, 100, 100, 1000, 0.0; do_visu=true, do_test=false)
