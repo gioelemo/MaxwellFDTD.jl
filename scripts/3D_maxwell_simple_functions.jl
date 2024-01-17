@@ -55,15 +55,19 @@ end
     ε0 = 1.0
     μ0 = 1.0
     σ = 1.0
+    pml_width = 10
+    pml_alpha = 0.1
+
     # numerics
     nx, ny, nz = 100, 100, 100
-    dx, dy, dz = lx / nx, ly / ny, lz / nz
-    xc = LinRange(-lx / 2 + dx / 2, lx / 2 - dx / 2, nx)
-    yc = LinRange(-ly / 2 + dy / 2, ly / 2 - dy / 2, ny)
-    zc = LinRange(-lz / 2 + dz / 2, lz / 2 - dz / 2, nz)
+    dx, dy, dz = lx / nx_pml, ly / ny_pml, lz / nz_pml
+    xc = LinRange(-lx / 2 + dx / 2, lx / 2 - dx / 2, nx_pml)
+    yc = LinRange(-ly / 2 + dy / 2, ly / 2 - dy / 2, ny_pml)
+    zc = LinRange(-lz / 2 + dz / 2, lz / 2 - dz / 2, nz_pml)
     dt = min(dx, dy, dz)^2 / (1 / ε0 / μ0) / 4.1
     nt = 1000
     nout = 1e2
+
     # initial conditions
     Ex = @zeros(nx, ny + 1, nz + 1)
     Ey = @zeros(nx + 1, ny, nz + 1)
