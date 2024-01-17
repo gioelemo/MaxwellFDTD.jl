@@ -47,18 +47,19 @@ include("../scripts/3D_maxwell_pml_xPU.jl")
 # end
 
 # # ---- Reference test ----
-# ny_ = 50; nt_ = 10; nvis_ = 10
-# nx_ = ny_ - 1 
-# pml_width = 10
+nt_ = 100
+nx_ , ny_ , nz_ = 100, 100, 100
+pml_width = 10
+pml_alpha = 0.1
 
-# Hz = maxwell(ny_, nt_, nvis_, pml_width; do_visu=false, do_check=true, do_test=true)
+Hz = maxwell(nx_, ny_, nz_, nt_, pml_alpha; do_visu=false, do_test=true)
 
-# nx_pml, ny_pml = nx_ + 2 * pml_width, ny_ + 2 * pml_width
+nx_pml, ny_pml, nz_pml = nx_ + 2 * pml_width, ny_ + 2 * pml_width, nz_ + 2 * pml_width
 
-# Hz_ref = zeros(Float32, nx_pml, ny_pml)
-# Hz_ref = load("../test/ref_Hz_2D_cpu.jld")
-# array_value = Hz_ref["data"]
+Hz_ref = zeros(Float32, nx_pml, ny_pml, nz_pml - 1)
+Hz_ref = load("../test/ref_Hz_3D_cpu.jld")
+array_value = Hz_ref["data"]
 
-# @testset "Reference Test: Hz_ref = Hz" begin
-#     @test isapprox(Hz, array_value)
-# end
+@testset "Reference Test: Hz_ref = Hz" begin
+    @test isapprox(Hz, array_value)
+end

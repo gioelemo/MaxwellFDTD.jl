@@ -7,7 +7,7 @@ else
     @init_parallel_stencil(Threads, Float64, 3, inbounds=true)
 end
 
-using Plots
+using Plots, JLD
 
 """
     save_array(Aname,A)
@@ -208,7 +208,7 @@ Use the Finite Difference Time Domain (FDTD) solver to solve Maxwell's equations
     dy_Ex = @zeros(nx_pml, ny_pml, nz_pml + 1)
     dx_Ey = @zeros(nx_pml, ny_pml, nz_pml + 1)
 
-    println("init ok")
+    #println("init ok")
     
     # Timestepping
     for it in 1:nt
@@ -274,6 +274,6 @@ end
 #maxwell()
 
 #maxwell(nx_, ny_, nz_, nt_, pml_alpha_; do_visu=false, do_check=true, do_test=true)
-maxwell(100, 100, 100, 1000, 0.1; do_visu=true, do_test=false)
+#maxwell(100, 100, 100, 1000, 0.1; do_visu=true, do_test=false)
 
-#maxwell(100, 100, 100, 1000, 0.0; do_visu=true, do_test=false)
+#maxwell(100, 100, 100, 100, 0.1; do_visu=true, do_test=true)
