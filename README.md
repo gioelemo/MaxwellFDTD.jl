@@ -1,4 +1,4 @@
-# MaxwellFDTD
+# MaxwellFDTD.jl
 
 [![Build Status](https://github.com/gioelemo/MaxwellFDTD.jl/actions/workflows/CI.yml/badge.svg?branch=main)](https://github.com/gioelemo/MaxwellFDTD.jl/actions/workflows/CI.yml/badge.svg?branch=main)
 [![codecov](https://codecov.io/github/gioelemo/MaxwellFDTD.jl/graph/badge.svg?token=HYJZDGJPFB)](https://codecov.io/github/gioelemo/MaxwellFDTD.jl)
