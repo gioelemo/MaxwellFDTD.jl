@@ -37,7 +37,7 @@ The code can be run directly on Julia REPL by installing all the packages listed
 Most of the scripts come with a `shell` script which can be use in a SLURM cluster environment with the command
 
 ```bash
-sbatch run_"name_of_program"_xPU.sh
+sbatch run_"name_of_program".sh
 ```
 
 All of the provided scripts can be run on CPU or GPU (and some of them on multiple xPUs).
