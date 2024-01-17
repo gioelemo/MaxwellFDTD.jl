@@ -61,7 +61,7 @@ end
     xc = LinRange(-lx / 2 + dx / 2, lx / 2 - dx / 2, nx)
     yc = LinRange(-ly / 2 + dy / 2, ly / 2 - dy / 2, ny)
     zc = LinRange(-lz / 2 + dz / 2, lz / 2 - dz / 2, nz)
-    dt = min(dx, dy, dz)^2 / (1 / ε0 / μ0) / 4.1 #4.1
+    dt = min(dx, dy, dz)^2 / (1 / ε0 / μ0) / 4.1
     nt = 1000
     nout = 1e2
     # initial conditions
