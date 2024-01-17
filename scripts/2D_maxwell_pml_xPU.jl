@@ -92,17 +92,16 @@ Use the Finite Difference Time Domain (FDTD) solver to solve Maxwell's equations
 - `nvis_::Integer`: Number of steps between visualisation output.
 - `pml_alpha_::Float` : "Strength" of the PML layer
 - `do_visu::Boolean=false`: Perform visualisation.
-- `do_check::Boolean=true` : Perform advance checks
 - `do_test::Boolean=false`: Perform testing (generate a jld reference file).
 """
-@views function maxwell(ny_, nt_, nvis_, pml_alpha_; do_visu=false, do_check=true, do_test=true)
-    # physics
+@views function maxwell(ny_, nt_, nvis_, pml_alpha_; do_visu=false, do_test=true)
+    # Physics
     lx, ly = 40.0, 40.0       # physical size
     ε0 = 1.0                  # permittivity
     μ0 = 1.0                  # permeability
     σ = 1.0                   # electrical conductivity
     
-    # numerics
+    # Numerics
     nx, ny = ny_ - 1, ny_     # number space steps
 
     # PML parameters
@@ -119,13 +118,16 @@ Use the Finite Difference Time Domain (FDTD) solver to solve Maxwell's equations
     nt = nt_
     nout = nvis_
 
-    # initial conditions
+    # Initial conditions
+    # E-fields
     Ex = @zeros(nx_pml, ny_pml + 1)
     Ey = @zeros(nx_pml + 1, ny_pml)
+
+    # H-fields
     Hz = @zeros(nx_pml, ny_pml)
     Hz = Data.Array(exp.(.-xc .^ 2 .- yc' .^ 2))
 
-    # visualisation for cluster
+    # Visualisation for cluster
     if do_visu
         # plotting environment
         ENV["GKSwstype"]="nul"
@@ -135,7 +137,7 @@ Use the Finite Difference Time Domain (FDTD) solver to solve Maxwell's equations
         iframe = 0
     end
 
-    # timestepping
+    # Timestepping
     for it in 1:nt
         # Update E
         @parallel update_Ex!(Ex, Hz, σ, ε0, dt, dy)
@@ -146,8 +148,10 @@ Use the Finite Difference Time Domain (FDTD) solver to solve Maxwell's equations
         @parallel (1:pml_width, 1:size(Ey, 1)) update_PML_y!(pml_width, pml_alpha, Ey)
 
         # Update H
-        @parallel update_Hz!(Hz, Ex, Ey, σ, μ0, dt, dy, dx)
-        
+        if pml_width > 0
+            @parallel update_Hz!(Hz, Ex, Ey, σ, μ0, dt, dy, dx)
+        end
+
         if it % nout == 0 && do_visu == true
             # Create a heatmap
             plt = heatmap(Array(Hz'), aspect_ratio=:equal, xlims=(1, nx_pml), ylims=(1, ny_pml), c=:turbo, title="\$H_z\$ at it=$it")
@@ -164,7 +168,7 @@ Use the Finite Difference Time Domain (FDTD) solver to solve Maxwell's equations
         end
     end
 
-    # testing
+    # Testing
     if do_test == true
         if USE_GPU
             save("../test/ref_Hz_2D_gpu.jld", "data", Hz)         # store case for reference testing
@@ -185,4 +189,3 @@ end
 #maxwell(256, 15000, 100, 5.0; do_visu=true, do_test=false)
 #maxwell(256, 15000, 100, 0.1; do_visu=true, do_test=false)
 
-#maxwell(50, 10, 10, 0.25; do_visu=true, do_test=false)
