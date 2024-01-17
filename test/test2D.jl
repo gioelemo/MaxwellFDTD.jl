@@ -51,7 +51,7 @@ ny_ = 50; nt_ = 10; nvis_ = 10
 nx_ = ny_ - 1 
 pml_width = 10
 
-Hz = maxwell(ny_, nt_, nvis_, pml_width; do_visu=false, do_check=true, do_test=true)
+Hz = maxwell(ny_, nt_, nvis_, pml_width; do_visu=false, do_test=true)
 
 nx_pml, ny_pml = nx_ + 2 * pml_width, ny_ + 2 * pml_width
 
