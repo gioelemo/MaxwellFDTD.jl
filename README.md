@@ -383,47 +383,94 @@ Similar to the previous case we observe that some waves are partially absorbed b
 
 ### Mathematical Formulation
 
-TODO: Explain formulas in 3D 
+By starting with the Maxwell's equation given in [this](#maxwells-equations) section, we get, in a similar way as in the 2D case the following equations ($TE^z$ and $TM^z$ polarizations):
+
+$$
+\begin{align*}
+\sigma E_x + \varepsilon \frac{\partial E_x}{\partial t} &= \frac{\partial H_z}{\partial y} - \frac{\partial H_y}{\partial z}\tag{10}\\
+\sigma E_y + \varepsilon \frac{\partial E_y}{\partial t} &= \frac{\partial H_x}{\partial z}-\frac{\partial H_z}{\partial x} \tag{11} \\
+\sigma E_z + \varepsilon \frac{\partial E_z}{\partial t} &= \frac{\partial H_y}{\partial x}-\frac{\partial H_x}{\partial y} \tag{12} \\
+-\sigma_m H_x - \mu\frac{\partial H_x}{\partial t} &= \frac{\partial E_z}{\partial y} - \frac{\partial E_y}{\partial z} \tag{13}\\
+-\sigma_m H_y - \mu\frac{\partial H_y}{\partial t} &= \frac{\partial E_x}{\partial z} - \frac{\partial E_z}{\partial x} \tag{14}\\
+-\sigma_m H_z - \mu\frac{\partial H_z}{\partial t} &= \frac{\partial E_y}{\partial x} - \frac{\partial E_x}{\partial y} \tag{15}
+\end{align*}
+$$
 
 We can transform the previous equation using finite difference into the following set of 3D update equations:
 
-1. For $E_x$ (Electric field in $x$-direction from Equation (xxx))
+1. For $E_x$ (Electric field in $x$-direction from Equation (10))
 
 $$
 E_x += \frac{\Delta t}{\varepsilon} \left( -\sigma \cdot E_x +  \frac{\partial H_z}{\partial y} -  \frac{\partial H_y}{\partial z}\right)
 $$
 
-2. For $E_y$ (Electric field in $y$-direction from Equation (xx))
+2. For $E_y$ (Electric field in $y$-direction from Equation (11))
 
 $$
 E_y += \frac{\Delta t}{\varepsilon} \left( -\sigma \cdot E_y + \frac{\partial H_x}{\partial z} - \frac{\partial H_z}{\partial x}\right)
 $$
 
-3. For $E_z$ (Electric field in $z$-direction from Equation (xx))
+3. For $E_z$ (Electric field in $z$-direction from Equation (12))
 
 $$
 E_z += \frac{\Delta t}{\varepsilon} \left( -\sigma \cdot E_y + \frac{\partial H_y}{\partial x} - \frac{\partial H_x}{\partial y}\right)
 $$
 
-4. For $H_x$ (Magnetic field in $x$-direction from Equation (xxx))
+4. For $H_x$ (Magnetic field in $x$-direction from Equation (13))
 
 $$
 H_x +=  \frac{\Delta t}{\mu}\left(-\sigma \cdot H_z + \frac{\partial E_y}{\partial z} - \frac{\partial E_z}{\partial y}\right)
 $$
 
-5. For $H_y$ (Magnetic field in $y$-direction from Equation (xxx))
+5. For $H_y$ (Magnetic field in $y$-direction from Equation (14))
 
 $$
 H_y +=  \frac{\Delta t}{\mu}\left(-\sigma \cdot H_z + \frac{\partial E_z}{\partial x} - \frac{\partial E_x}{\partial z}\right)
 $$
 
-6. For $H_z$ (Magnetic field in $z$-direction from Equation (xxx))
+6. For $H_z$ (Magnetic field in $z$-direction from Equation (15))
 
 $$
 H_z +=  \frac{\Delta t}{\mu}\left(-\sigma \cdot H_z + \frac{\partial E_x}{\partial y} - \frac{\partial E_y}{\partial x}\right)
 $$
 
+Similar to the 2D case we need to implement Perfectly Matched Layer (PML) Boundary Conditions as introduced in [4]. 
+
+The PML boundary conditions are applied to absorb outgoing waves. In the code, this is done using the following update equations for PML regions:
+
+1. Update Equation for PML in $x$-direction (for $E_x$):
+
+$$
+E_x[i,j,k] = e^{-(\text{pml width}-i)\cdot\text{pml alpha}}\cdot E_x[i,j,k]
+$$
+
+(applied to the first and last $\text{pml width}$ rows of $E_x$).
+
+2. Update Equation for PML in $y$-direction (for $E_y$):
+
+$$
+E_y[i,j,k] = e^{-(\text{pml width}-j)\cdot\text{pml alpha}}\cdot E_y[i,j,k]
+$$
+
+(applied to the first and last $\text{pml width}$ rows of $E_y$).
+
+3. Update Equation for PML in $z$-direction (for $E_z$):
+
+$$
+E_z[i,j,k] = e^{-(\text{pml width}-k)\cdot\text{pml alpha}}\cdot E_y[i,j,k]
+$$
+
+(applied to the first and last $\text{pml width}$ rows of $E_z$).
+
+where:
+- $\text{pml width}$: is the width of the extension of the domain in $x$ and $y$ direction.
+- $\text{pml alpha}$: is the factor which control the effect of the PML boundary.
+
+
 ### Code
+
+The mathematical formulation of the previous subsection can be translated into code. This code can be found in [3D_maxwell_pml_xPU](./scripts/3D_maxwell_pml_xPU.jl)
+The structure of the code is similar to the one of the 1D code.
 
 TODO: results
 
@@ -437,7 +484,7 @@ TODO: results
 
 ## Testing
 
-For all implementations (1D, 2D, 3D) we perform some unit and reference tests. For more details of the testing we refer directly to the test files [test1D.jl](./test/test1D.jl), [test2D.jl](./test/test2D.jl), [test3D.jl](./test/test3D.jl). Please not that the coverage reported at the begin of this file might be incorrect (did not have the time to find a fix).
+For all implementations (1D, 2D, 3D) we perform some unit and reference tests. For more details of the testing we refer directly to the test files [test1D.jl](./test/test1D.jl), [test2D.jl](./test/test2D.jl), [test3D.jl](./test/test3D.jl). Please note that the coverage reported at the begin of this file might be incorrect (did not have the time to find a fix).
 
 ## Results and conclusions
 
