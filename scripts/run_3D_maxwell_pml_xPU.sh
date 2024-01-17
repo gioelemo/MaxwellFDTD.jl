@@ -3,7 +3,7 @@
 #SBATCH --output=3D_maxwell_pml_xPU.%j.o
 #SBATCH --error=3D_maxwell_pml_xPU.%j.e
 #SBATCH --time=00:30:00
-#SBATCH --nodes=1
+#SBATCH --nodes=2
 #SBATCH --ntasks-per-node=1
 #SBATCH --partition=normal
 #SBATCH --constraint=gpu
@@ -12,4 +12,4 @@
 module load daint-gpu
 module load Julia/1.9.3-CrayGNU-21.09-cuda
 
-srun julia -O3 3D_maxwell_pml_xPU.jl
+srun julia -O3 3D_maxwell_combined_mpi.jl
