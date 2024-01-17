@@ -317,7 +317,8 @@ where:
 
 
 ### Code
-The mathematical formulation of the previous subsection can be translated into code. This code can be found in [2D_maxwell_pml_xPU](./scripts/2D_maxwell_pml_xPU.jl)
+The mathematical formulation of the previous subsection can be translated into code. This code can be found in [2D_maxwell_pml_xPU](./scripts/2D_maxwell_pml_xPU.jl).
+
 The structure of the code is similar to the one of the 1D code.
 
 We can run the code using
@@ -468,7 +469,8 @@ where:
 
 ### Code
 
-The mathematical formulation of the previous subsection can be translated into code. This code can be found in [3D_maxwell_pml_xPU](./scripts/3D_maxwell_pml_xPU.jl)
+The mathematical formulation of the previous subsection can be translated into code. This code can be found in [3D_maxwell_pml_xPU](./scripts/3D_maxwell_pml_xPU.jl).
+
 The structure of the code is similar to the one of the 2D code.
 
 TODO: results
