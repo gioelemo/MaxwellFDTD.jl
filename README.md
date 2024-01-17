@@ -1,4 +1,4 @@
-# MaxwellFDTD.jl
+<h1> <img src="docs/maxwell.png" alt="MaxwellFDTD.jl" width="50"> MaxwellFDTD.jl </h1>
 
 [![Build Status](https://github.com/gioelemo/MaxwellFDTD.jl/actions/workflows/CI.yml/badge.svg?branch=main)](https://github.com/gioelemo/MaxwellFDTD.jl/actions/workflows/CI.yml/badge.svg?branch=main)
 [![codecov](https://codecov.io/github/gioelemo/MaxwellFDTD.jl/graph/badge.svg?token=HYJZDGJPFB)](https://codecov.io/github/gioelemo/MaxwellFDTD.jl)
@@ -511,3 +511,5 @@ Some possible extensions of the actual scripts could be:
 [4] Berenger, Jean-Pierre. "A perfectly matched layer for the absorption of electromagnetic waves." Journal of computational physics 114.2 (1994): 185-200 (also [here](./references/APerfectlyMatchedLayerfortheAbsorptionofElectromagneticWaves.pdf))
 
 [5] Hyperphisics.phy-astr.gsu.edu, Maxwell's Equations, http://hyperphysics.phy-astr.gsu.edu/hbase/electric/maxeq.html
+
+[6] Image used as a logo: https://www.radartutorial.eu/04.history/pic/maxwell.small.png
