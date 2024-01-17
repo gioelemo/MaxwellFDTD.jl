@@ -24,23 +24,23 @@
 
 ## Introduction
 
-This repository hosts the implementation of a Maxwell equations solver using the Finite Differences Time Domain (FDTD) method in the Julia programming language, utilizing the  [ParallelStencil.jl](https://github.com/omlins/ParallelStencil.jl) and [ImplicitGlobalGrid.jl](https://github.com/eth-cscs/ImplicitGlobalGrid.jl) packages. 
+This repository hosts the implementation of a Maxwell equations solver using the Finite Differences Time Domain (FDTD) method in the Julia programming language. The implementation utilizes the  [ParallelStencil.jl](https://github.com/omlins/ParallelStencil.jl) and [ImplicitGlobalGrid.jl](https://github.com/eth-cscs/ImplicitGlobalGrid.jl) packages. 
 
-We start with a simple 1D implementation and we extend the code to 2D and 3D employing both GPU and CPU architectures. The implementation was further augmented to encompass multi-xPU capabilities, leveraging MPI for communication. 
+We initially develop a simple 1D implementation and subsequently extend the code to 2D and 3D, taking advantage of both GPU and CPU architectures. The implementation has been enhanced to support multi-xPU capabilities, making use of MPI for communication.
 
-All tests were conducted locally on a MacBook Pro 2017 - 2.8 GHz Intel Core i7 quad-core processor or on the Piz Daint Supercomputer (CSCS - Lugano) using one or multiple NVIDIA Tesla P100 GPUs.
+All tests were performed locally on a MacBook Pro 2017 with a 2.8 GHz Intel Core i7 quad-core processor. Additionally, testing was conducted on the Piz Daint Supercomputer at CSCS in Lugano, employing one or multiple NVIDIA Tesla P100 GPUs.
 
 ## Setup
 
 The code can be run directly on Julia REPL by installing all the packages listed in [Project.toml](Project.toml) file. 
 
-Most of the scripts come with a `shell` script which can be use in a SLURM cluster environment with the command
+For ease of use in a SLURM cluster environment, most scripts are accompanied by a `shell` script. This script can be employed with the following command:
 
 ```bash
 sbatch run_"name_of_program".sh
 ```
 
-All of the provided scripts can be run on CPU or GPU (and some of them on multiple xPUs).
+It is noteworthy that all provided scripts are compatible with both CPU and GPU execution, with certain scripts supporting multiple xPU configurations.
 
 ## Maxwell's equations
 
@@ -93,7 +93,7 @@ For a more detailed review of electromagnetics consider  [3] (Chapter 2  - Brief
 
 ## Numerical Methods
 
-To solve the equations it is possible to use the Finite Difference Time Domain Method (FDTD).
+To solve the equations of the previous section it is possible to use the Finite Difference Time Domain Method (FDTD).
 
 This method introduced by Kane S. Yee [1] consists of discretizing the time-dependent Maxwell's equation using a central finite-difference approach.
 
@@ -101,13 +101,13 @@ The finite-difference equations derived from this process are addressed in a lea
 
 ## 1D FDTD
 
-The goal of this section is to provide a simple code for a Finite Difference Time domain simulator for solving a simple version of the Maxwell equations in 1D.
+The objective of this section is to present a straightforward code implementation for a Finite Difference Time Domain simulator designed to solve a simplified version of Maxwell's equations in 1D.
 
 ### Mathematical Formulation
 
-We assume in this case that the electric field only has a $z$ component.
+In this scenario, it is assumed that the electric field only possesses a $z$ component.
 
-In this case Faraday's law (Equation 1) can be written as:
+In this specific case, Faraday's law (Equation 1) can be expressed as:
 
 $$
 -\mu \frac{\partial \boldsymbol{H}}{\partial t}=\nabla \times \boldsymbol{E}=\left|\begin{array}{ccc}
@@ -136,7 +136,7 @@ $$
 \end{align*}
 $$
 
-We can then transform the previous two equation using a finite difference approach as follow:
+We can subsequently transform the preceding two equations using a finite difference approach as follows:
 
 1. For $H_y$:
 
@@ -177,9 +177,9 @@ We can additionally define the Courant number $S_c$ as
 $$S_c := \frac{c \Delta_t}{\Delta_x}$$
 
 ### Code
-The method of the previous subsection is implemented in the [1D_maxwell_additive_source_lossy_layer.jl](./scripts/1D_maxwell_additive_source_lossy_layer.jl) file.
+The method described in the previous subsection is implemented in the [1D_maxwell_additive_source_lossy_layer.jl](./scripts/1D_maxwell_additive_source_lossy_layer.jl) file.
 
-We can use the following update equations when working with integer indexes and assuming that $S_c=1$:
+The following update equations can be employed when working with integer indices and assuming that $S_c=1$:
 
 - The magnetic-field nodes can be updated with:
 `hy[m] = hy[m] + (ez[m + 1] - ez[m]) / imp0`
@@ -225,11 +225,11 @@ After running the code with
 |:--:| 
 | *Maxwell FDTD 1D simulation nx=200, nt=450 - Ez field, exp source* |
 
-As we can see the additive source is added at the TSFS boundary (at index 50). The "wave" is then propagated until the interface between the free-space and the dielectric region (at index 100) where one part get reflected and the other part continues into the dielectric region. At the lossy layer index (at index 180) we start to introduce loss in the simulation, this the magnitude of the wave start to decrease. 
+As observed, the additive source is introduced at the TSFS boundary (at index 50). Subsequently, the "wave" propagates until reaching the interface between the free-space and the dielectric region (at index 100), where a portion undergoes reflection, and the remainder continues into the dielectric region. Upon reaching the index of the lossy layer (at index 180), the simulation introduces loss, causing a reduction in the magnitude of the wave. 
 
-It is also possible to observe that at the left part of the computational domain, the wave is not reflected. This is due to the use of Absorbing Boundary Conditions (ABC).
+It is noteworthy that on the left part of the computational domain, the wave is not reflected, a behavior attributed to the utilization of Absorbing Boundary Conditions (ABC).
 
-Similar as before we can run the code with a sin source with the following parameters:
+Similarly, as in the previous case, the code can be executed with a sine source using the following parameters:
 
 ```julia
 nx   = 200    # number space steps
@@ -253,15 +253,14 @@ After running the code with
 |:--:|
 | *Maxwell FDTD 1D simulation nx=200, nt=450 - Ez field, sin source* |
 
-As in the previous example, we can also see here that the additive source is added at the TSFS boundary (at index 50). The "wave" is then propagated until the interface between the free-space and the dielectric region (at index 100) where one part get reflected and the other part continues into the dielectric region. In this case we start to introduce loss directly at the start of the dielectric region (and not later as done in the previous example) in the simulation, this the magnitude of the wave start to decrease. 
+Similar to the previous example, it is evident that the additive source is introduced at the TSFS boundary (at index 50). Subsequently, the "wave" propagates until reaching the interface between the free-space and the dielectric region (at index 100), where a portion undergoes reflection, and the remainder continues into the dielectric region. Notably, in this case, loss is introduced right at the beginning of the dielectric region in the simulation, leading to a gradual decrease in the magnitude of the wave.
 
-Also here, tt is possible to observe that at the left part of the computational domain, the wave is not reflected. This is due to the use of Absorbing Boundary Conditions (ABC).
-
+Moreover, as observed before, on the left part of the computational domain, the wave is not reflected, attributed to the implementation of Absorbing Boundary Conditions (ABC).
 
 ## 2D FDTD
 
 ### Mathematical Formulation
-By starting with the Maxwell's equation given in [this](#maxwells-equations) section, we get, in a similar way as in the 1D case the following equations ($TE^z$ polarization):
+Starting with the Maxwell's equation given in [ Maxwell's equation](#maxwells-equations) section, we obtain, in a manner analogous to the 1D case, the following equations ($TE^z$ polarization):
 
 $$
 \begin{align*}
@@ -271,7 +270,7 @@ $$
 \end{align*}
 $$
 
-We can transform the previous equation using finite difference into the following set of 2D update equations:
+The preceding equations can be transformed using finite difference methods into the following set of 2D update equations:
 
 1. For $E_x$ (Electric field in $x$-direction from Equation (7))
 
@@ -383,7 +382,7 @@ Similar to the previous case we observe that some waves are partially absorbed b
 
 ### Mathematical Formulation
 
-By starting with the Maxwell's equation given in [this](#maxwells-equations) section, we get, in a similar way as in the 2D case the following equations ($TE^z$ and $TM^z$ polarizations):
+Starting with the Maxwell's equation given in [Maxwell's equation](#maxwells-equations) section, we get, in a similar way as in the 2D case the following equations ($TE^z$ and $TM^z$ polarizations):
 
 $$
 \begin{align*}
@@ -396,7 +395,7 @@ $$
 \end{align*}
 $$
 
-We can transform the previous equation using finite difference into the following set of 3D update equations:
+The preceding equation can be transformed using finite difference methods into the following set of 3D update equations:
 
 1. For $E_x$ (Electric field in $x$-direction from Equation (10))
 
@@ -484,16 +483,19 @@ TODO: results
 
 ## Testing
 
-For all implementations (1D, 2D, 3D) we perform some unit and reference tests. For more details of the testing we refer directly to the test files [test1D.jl](./test/test1D.jl), [test2D.jl](./test/test2D.jl), [test3D.jl](./test/test3D.jl). Please note that the coverage reported at the begin of this file might be incorrect (did not have the time to find a fix).
+In all implementations (1D, 2D, 3D), we perform some unit and reference tests. For more details of the testing, we refer directly to the test files [test1D.jl](./test/test1D.jl), [test2D.jl](./test/test2D.jl), [test3D.jl](./test/test3D.jl). Please note that the coverage reported at the beginning of this file might be incorrect (did not have the time to find a fix).
 
 ## Results and conclusions
 
 TODO: Write some conclusion and to what extent the code can be extended
 
-Some possible extensions could be:
+Some possible extensions of the actual scripts could be:
 1. Varying PML width for each dimension
 2. Add more complex PML (extensions)
-3. Extend the testsets to cover more field updates
+3. Try other type of Boundary Condition
+4. Improve the performance of the code (performance optimization)
+4. Add nicer visualisations
+3. Extend the testsets to cover more field updates (and make codecov work)
 
 ## References
 
