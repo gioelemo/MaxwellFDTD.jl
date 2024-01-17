@@ -437,11 +437,16 @@ TODO: results
 
 ## Testing
 
-For all implementations (1D, 2D, 3D) we perform some unit and reference testing. For more details of the testing we refer directly to the test files [test1D.jl](./test/test1D.jl), [test2D.jl](./test/test2D.jl), [test3D.jl](./test/test3D.jl)
+For all implementations (1D, 2D, 3D) we perform some unit and reference tests. For more details of the testing we refer directly to the test files [test1D.jl](./test/test1D.jl), [test2D.jl](./test/test2D.jl), [test3D.jl](./test/test3D.jl). Please not that the coverage reported at the begin of this file might be incorrect (did not have the time to find a fix).
 
 ## Results and conclusions
 
 TODO: Write some conclusion and to what extent the code can be extended
+
+Some possible extensions could be:
+1. Varying PML width for each dimension
+2. Add more complex PML (extensions)
+3. Extend the testsets to cover more field updates
 
 ## References
 
