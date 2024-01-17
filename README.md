@@ -493,7 +493,7 @@ Some possible extensions of the actual scripts could be:
 1. Varying PML width for each dimension
 2. Add more complex PML (extensions)
 3. Try other type of Boundary Condition
-4. Improve the performance of the code (performance optimization)
+4. Improve the performance of the code (performance optimization and benchmarking)
 4. Add nicer visualisations
 3. Extend the testsets to cover more field updates (and make codecov work)
 
