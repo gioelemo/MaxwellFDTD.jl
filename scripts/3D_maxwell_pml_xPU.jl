@@ -1,4 +1,4 @@
-const USE_GPU = true
+const USE_GPU = false
 using ParallelStencil
 using ParallelStencil.FiniteDifferences3D
 @static if USE_GPU
