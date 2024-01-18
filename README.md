@@ -203,19 +203,19 @@ In this code is also additionally implemented:
 We first run the code for the Gaussian source case with the following parameters:
 
 ```julia
-nx   = 200    # number space steps
-nt   = 450    # number timesteps
-nvis = 10     # interval visualisation
-src  = "exp"  # Gaussian source
-imp0 = 377.0  # free space impedance
-loss = 0.02   # loss factor
-interface_index = 100  # interface index between free space-dielectric
-epsR = 9.0    # relative permittivity
+nx   = 200                   # number space steps
+nt   = 450                   # number timesteps
+nvis = 10                    # interval visualisation
+src  = "exp"                 # Gaussian source
+imp0 = 377.0                 # free space impedance
+loss = 0.02                  # loss factor
+interface_index = 100        # interface index between free space-dielectric
+epsR = 9.0                   # relative permittivity
 loss_layer_index     = 180   # loss layer index
 TSFS_boundary_index  = 50    # TSFS index
-Cdt_dx   = 1.0   # Courant's number
-width    = 100.0 # width of  Gaussian pulse
-location = 30.0  # location of Gaussian pulse
+Cdt_dx   = 1.0               # Courant's number
+width    = 100.0             # width of  Gaussian pulse
+location = 30.0              # location of Gaussian pulse
 ```
 
 After running the code with 
@@ -232,18 +232,18 @@ It is noteworthy that on the left part of the computational domain, the wave is 
 Similarly, as in the previous case, the code can be executed with a sine source using the following parameters:
 
 ```julia
-nx   = 200    # number space steps
-nt   = 450    # number timesteps
-nvis = 10     # interval visualisation
-src  = "sin"  # Sin source
-imp0 = 377.0  # free space impedance
-loss = 0.0253146   # loss factor
-interface_index = 100  # interface index between free space-dielectric
-epsR = 4.0       # relative permittivity
-N_lambda = 40.0  # number of points per wavelengths
-TSFS_boundary_index  = 50    # TSFS index
-Cdt_dx   = 1.0   # Courant's number
-location = 0.0   # location of Gaussian pulse
+nx   = 200                 # number space steps
+nt   = 450                 # number timesteps
+nvis = 10                  # interval visualisation
+src  = "sin"               # Sin source
+imp0 = 377.0               # free space impedance
+loss = 0.0253146           # loss factor
+interface_index = 100      # interface index between free space-dielectric
+epsR = 4.0                 # relative permittivity
+N_lambda = 40.0            # number of points per wavelengths
+TSFS_boundary_index  = 50  # TSFS index
+Cdt_dx   = 1.0             # Courant's number
+location = 0.0             # location of Gaussian pulse
 ```
 
 After running the code with 
