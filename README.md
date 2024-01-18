@@ -457,7 +457,7 @@ $$
 3. Update Equation for PML in $z$-direction (for $E_z$):
 
 $$
-E_z[i,j,k] = e^{-(\text{pml width}-k)\cdot\text{pml alpha}}\cdot E_y[i,j,k]
+E_z[i,j,k] = e^{-(\text{pml width}-k)\cdot\text{pml alpha}}\cdot E_z[i,j,k]
 $$
 
 (applied to the first and last $\text{pml width}$ rows of $E_z$).
@@ -498,7 +498,7 @@ nt   = 15000                     # number of time steps
 ```
 
 
-Also for the 3D case, we test the code with different values of $\text{pml alpha}$ and we use a "shifted Gaussian" initialization for the $H_x, H_y$ and $H_z fields$
+Also for the 3D case, we test the code with different values of $\text{pml alpha}$ and we use a "shifted Gaussian" initialization for the $H_x, H_y$ and $H_z$ fields
 
 1. $\text{pml alpha}=0.0$ (i.e. no PML boundary)
 
