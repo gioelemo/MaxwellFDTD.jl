@@ -226,7 +226,7 @@ function FDTD_1D(nx_, nt_, nvis_; src="exp", do_visu=false, do_test=false)
         ENV["GKSwstype"]="nul"
         if isdir("../docs/viz_out_1D")==false mkdir("../docs/viz_out_1D") end
         loadpath = "../docs/viz_out_1D/"; anim = Animation(loadpath,String[])
-        println("Animation directory: $(anim.dir)")
+        if do_test==false println("Animation directory: $(anim.dir)") end
         iframe = 0
     end
 
