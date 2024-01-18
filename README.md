@@ -516,11 +516,11 @@ TODO: ADD A SENTENCE TO EXPLAIN THE RESULTS
 
 It is also possible using the [3D_plotter_animations.jl](./docs/3D_plotter_animations.jl) to generate some animations. To generate the animation we iterate over the $n_z$-values and we take the corresponding field `[:, :, k]` entry (where `k` is the iterate index). The PML layer is represented by the black rectangle.
 
-|![](./docs/3D/Ex_3D_pml_nx_256_ny_256_nz_100_alpha_0.1.gif)|![](./docs/3D/Ey_3D_pml_nx_256_ny_256_nz_100_alpha_0.1.gif)|![](./docs/3D/Ez_3D_pml_nx_256_ny_256_nz_100_alpha_0.1.gif)|
+|![](./docs/3D/Ex_3D_pml_nx_256_ny_256_nz_100_alpha_0.0.gif)|![](./docs/3D/Ey_3D_pml_nx_256_ny_256_nz_100_alpha_0.0.gif)|![](./docs/3D/Ez_3D_pml_nx_256_ny_256_nz_100_alpha_0.0.gif)|
 |:--:| :--: | :--: |
 | *Ex field*| *Ey field* | *Ez field* |
 
-|![](./docs/3D/Hx_3D_pml_nx_256_ny_256_nz_100_alpha_0.1.gif)|![](./docs/3D/Hy_3D_pml_nx_256_ny_256_nz_100_alpha_0.1.gif)|![](./docs/3D/Hz_3D_pml_nx_256_ny_256_nz_100_alpha_0.1.gif)|
+|![](./docs/3D/Hx_3D_pml_nx_256_ny_256_nz_100_alpha_0.0.gif)|![](./docs/3D/Hy_3D_pml_nx_256_ny_256_nz_100_alpha_0.0.gif)|![](./docs/3D/Hz_3D_pml_nx_256_ny_256_nz_100_alpha_0.0.gif)|
 |:--:| :--: | :--: |
 | *Hx field*| *Hy field* | *Hz field*|
 
