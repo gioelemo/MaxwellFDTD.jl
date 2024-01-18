@@ -457,7 +457,7 @@ $$
 3. Update Equation for PML in $z$-direction (for $E_z$):
 
 $$
-E_z[i,j,k] = e^{-(\text{pml width}-k)\cdot\text{pml alpha}}\cdot E_y[i,j,k]
+E_z[i,j,k] = e^{-(\text{pml width}-k)\cdot\text{pml alpha}}\cdot E_z[i,j,k]
 $$
 
 (applied to the first and last $\text{pml width}$ rows of $E_z$).
