@@ -278,4 +278,4 @@ end
 
 #maxwell(100, 100, 100, 100, 0.1; do_visu=true, do_test=true)
 
-maxwell(256, 256, 100, 15000, 0.0, do_visu=true, do_test=false)
+#maxwell(256, 256, 100, 15000, 0.0, do_visu=true, do_test=false)
