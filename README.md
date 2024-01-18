@@ -247,7 +247,7 @@ location = 0.0             # location of Gaussian pulse
 ```
 
 After running the code with 
-`sbatch run_1D_maxwell_lossy_layer_xPU.sh` (works for both CPU and GPU by changing the `USE_GPU` flag in the [1D_maxwell_additive_source_lossy_layer.jl](./scripts/1D_maxwell_additive_source_lossy_layer.jl) file.) we get the following animation for the $E_z$ field
+`sbatch run_1D_maxwell_lossy_layer_xPU.sh` (works for both CPU and GPU by changing the `USE_GPU` flag in the [1D_maxwell_additive_source_lossy_layer.jl](./scripts/1D_maxwell_additive_source_lossy_layer.jl) file.) we get the following animation for the $E_z$ field:
 
 |![](./docs/1D/Maxwell_1D_xpu_sin.gif)|
 |:--:|
@@ -344,7 +344,7 @@ nt   = 15000           # number of time steps
 nvis = 100             # visualisation interval
 ```
 
-We test the code with different values of $\text{pml alpha}$
+We test the code with different values of $\text{pml alpha}$ and we use a Gaussian initialisation for the $H_z$ field.
 
 1. $\text{pml alpha}=0.0$ (i.e. no PML boundary)
 
@@ -368,7 +368,7 @@ The resulting animation is given as:
 
 Different as the previous case we observe that some waves are partially absorbed by the PML because we use a value of $\text{pml alpha}=0.1$.
 
-3. $\text{pml alpha}=5.0$ (i.e. PML boundary)
+3. $\text{pml alpha}=5.0$ (i.e. very strong PML boundary)
 
 The resulting animation is given as:
 
@@ -498,7 +498,7 @@ nt   = 15000                     # number of time steps
 ```
 
 
-Also for the 3D case, we test the code with different values of $\text{pml alpha}$
+Also for the 3D case, we test the code with different values of $\text{pml alpha}$ and we use a "shifted Gaussian" initialization for the $H_x, H_y$ and $H_z fields$
 
 1. $\text{pml alpha}=0.0$ (i.e. no PML boundary)
 
@@ -512,7 +512,7 @@ By running the [3D_plotter_surfaces.jl](./docs/3D_plotter_surfaces.jl) file we g
 |:--:| :--: | :--: |
 | *Hx field at nz/2*| *Hy field at nz/2* | *Hz field at nz/2-1* |
 
-TODO: ADD A SENTENCE TO EXPLAIN THE RESULTS
+From the images it can be seen that in almost all fields the oscillation on the boundary is very strong, this is due to the fact that no boundary conditions are present. In particular, we have used a value of alpha=0.0 for the PML. 
 
 It is also possible using the [3D_plotter_animations.jl](./docs/3D_plotter_animations.jl) to generate some animations. To generate the animation we iterate over the $n_z$-values and we take the corresponding field `[:, :, k]` entry (where `k` is the iterate index). The PML layer is represented by the black rectangle.
 
@@ -524,8 +524,7 @@ It is also possible using the [3D_plotter_animations.jl](./docs/3D_plotter_anima
 |:--:| :--: | :--: |
 | *Hx field*| *Hy field* | *Hz field*|
 
-TODO: ADD A SENTENCE TO EXPLAIN THE RESULTS
-
+As to be expected, it can be observed that the fields are reflected at the boundary, as they are not absorbed by the PML boundary.
 
 2. $\text{pml alpha}=0.1$ (i.e. slightly PML boundary)
 
@@ -539,7 +538,7 @@ By running the [3D_plotter_surfaces.jl](./docs/3D_plotter_surfaces.jl) file we g
 |:--:| :--: | :--: |
 | *Hx field at nz/2*| *Hy field at nz/2* | *Hz field at nz/2-1* |
 
-TODO: ADD A SENTENCE TO EXPLAIN THE RESULTS
+In contrast to the previous example, we can see how the PML layer reduces the oscillations of the fields on the domain boundary. This is because the fields are "partially absorbed" and are no longer completely reflected.
 
 It is also possible using the [3D_plotter_animations.jl](./docs/3D_plotter_animations.jl) to generate some animations. To generate the animation we iterate over the $n_z$-values and we take the corresponding field `[:, :, k]` entry (where `k` is the iterate index). The PML layer is represented by the black rectangle.
 
@@ -551,7 +550,7 @@ It is also possible using the [3D_plotter_animations.jl](./docs/3D_plotter_anima
 |:--:| :--: | :--: |
 | *Hx field*| *Hy field* | *Hz field*|
 
-TODO: ADD A SENTENCE TO EXPLAIN THE RESULTS
+Here, too, one can observe what was formulated in the comment to the previous images. The PML partially blocks the reflection of the fields.
 
 3. $\text{pml alpha}=5.0$ (i.e. PML boundary)
 
@@ -565,7 +564,7 @@ By running the [3D_plotter_surfaces.jl](./docs/3D_plotter_surfaces.jl) file we g
 |:--:| :--: | :--: |
 | *Hx field at nz/2*| *Hy field at nz/2* | *Hz field at nz/2-1* |
 
-TODO: ADD A SENTENCE TO EXPLAIN THE RESULTS
+In this case we can observe a more moderate oscillation on the boundary than in the first example, but generally more intense within the domain. This is due to the fact that the PML alpha value is very high (in comparison with that of the previous case) and a more pronounced "damping" is obtained.
 
 It is also possible using the [3D_plotter_animations.jl](./docs/3D_plotter_animations.jl) to generate some animations. To generate the animation we iterate over the $n_z$-values and we take the corresponding field `[:, :, k]` entry (where `k` is the iterate index). The PML layer is represented by the black rectangle.
 
@@ -577,7 +576,7 @@ It is also possible using the [3D_plotter_animations.jl](./docs/3D_plotter_anima
 |:--:| :--: | :--: |
 | *Hx field*| *Hy field* | *Hz field*|
 
-TODO: ADD A SENTENCE TO EXPLAIN THE RESULTS
+We can see from the animations that the values of all fields decrease very quickly. This is also due to the fact that we used a very high PML alpha value.
 
 ## Testing
 
@@ -585,15 +584,20 @@ In all implementations (1D, 2D, 3D), we perform some unit and reference tests. F
 
 ## Results and conclusions
 
-TODO: Write some conclusion and to what extent the code can be extended
+In conclusion, the MaxwellFDTD.jl repository provides a comprehensive implementation of a Finite Differences Time Domain (FDTD) solver for Maxwell's equations in the Julia programming language. The solver spans across one, two, and three-dimensional domains, showcasing its versatility in handling electromagnetic wave propagation.
 
-Some possible extensions of the actual scripts could be:
-1. Varying PML width for each dimension
-2. Add more complex PML (extensions)
-3. Try other type of Boundary Condition
-4. Improve the performance of the code (performance optimization and benchmarking)
-4. Add nicer visualisations
-3. Extend the testsets to cover more field updates (and make codecov work)
+Utilizing the power of parallel computing with the [ParallelStencil.jl](https://github.com/omlins/ParallelStencil.jl) and [ImplicitGlobalGrid.jl](https://github.com/eth-cscs/ImplicitGlobalGrid.jl) packages, the code demonstrates efficient execution on both CPU and GPU architectures. The implementation incorporates essential features such as Perfectly Matched Layer (PML) Boundary Conditions to absorb outgoing waves, making it suitable for a wide range of electromagnetic simulations.
+
+The provided examples illustrate the solver's capabilities, including simulations with various source types, PML parameters, and visualizations in one, two, and three dimensions. The provided documentation guides users through the setup, numerical methods, and testing procedures.
+
+Some possible extensions of the actual scripts could include:
+
+1. Varying PML width for each dimension.
+2. Incorporating more complex PML extensions.
+3. Exploring alternative types of Boundary Conditions.
+4. Enhancing the performance of the code through optimization and benchmarking.
+5. Introducing aesthetically pleasing visualizations.
+6. Expanding the test sets to cover additional field updates and addressing codecov integration.
 
 ## References
 
