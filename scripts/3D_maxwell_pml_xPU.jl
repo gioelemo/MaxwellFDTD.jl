@@ -146,7 +146,7 @@ Update the PML for the Ez field in the z-direction
 end
 
 """
-    maxwell(nx_, ny_, nz_, nt_, pml_alpha_; do_visu=false, do_check=true, do_test=true)
+    maxwell(nx_, ny_, nz_, nt_, pml_alpha_; do_visu=false, do_test=true)
 
 Use the Finite Difference Time Domain (FDTD) solver to solve Maxwell's equations
 
@@ -244,7 +244,9 @@ Use the Finite Difference Time Domain (FDTD) solver to solve Maxwell's equations
         @parallel compute_d_xa!(Ey, dx_Ey)
         @parallel (1:size(Hz, 1), 1:size(Hz, 2), 1:size(Hz, 3)) update_Hz!(Hz, dt, μ0, σ, Ex, dy_Ex, Ey, dx_Ey, dx, dy)
         
-        println(it)
+        if do_test == false
+            println(it)
+        end
     end
 
     # Visualisation
@@ -273,9 +275,12 @@ end
 
 #maxwell()
 
-#maxwell(nx_, ny_, nz_, nt_, pml_alpha_; do_visu=false, do_check=true, do_test=true)
-#maxwell(100, 100, 100, 1000, 0.1; do_visu=true, do_test=false)
+#maxwell(nx_, ny_, nz_, nt_, pml_alpha_; do_visu=false, do_test=true)
 
+# Functions used for testing
+#maxwell(100, 100, 100, 1000, 0.1; do_visu=true, do_test=false)
 #maxwell(100, 100, 100, 100, 0.1; do_visu=true, do_test=true)
 
+# Function used for the simulations in README.md
 #maxwell(256, 256, 100, 15000, 0.0, do_visu=true, do_test=false)
+#maxwell(256, 256, 100, 15000, 0.1, do_visu=true, do_test=false)

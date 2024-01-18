@@ -115,7 +115,7 @@ Use the Finite Difference Time Domain (FDTD) solver to solve Maxwell's equations
         ENV["GKSwstype"]="nul"
         if isdir("../docs/viz_out_2D")==false mkdir("../docs/viz_out_2D") end
         loadpath = "../docs/viz_out_2D/"; anim = Animation(loadpath,String[])
-        println("Animation directory: $(anim.dir)")
+        if do_test==false println("Animation directory: $(anim.dir)") end
         iframe = 0
     end
 

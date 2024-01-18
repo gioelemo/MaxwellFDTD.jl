@@ -516,11 +516,11 @@ TODO: ADD A SENTENCE TO EXPLAIN THE RESULTS
 
 It is also possible using the [3D_plotter_animations.jl](./docs/3D_plotter_animations.jl) to generate some animations. To generate the animation we iterate over the $n_z$-values and we take the corresponding field `[:, :, k]` entry (where `k` is the iterate index). The PML layer is represented by the black rectangle.
 
-|![](./docs/3D/Ex_3D_pml_nx_256_ny_256_nz_100_alpha_0.0.gif)|![](./docs/3D/Ey_3D_pml_nx_256_ny_256_nz_100_alpha_0.0.gif)|![](./docs/3D/Ez_3D_pml_nx_256_ny_256_nz_100_alpha_0.0.gif)|
+|![](./docs/3D/Ex_3D_pml_nx_256_ny_256_nz_100_alpha_0.1.gif)|![](./docs/3D/Ey_3D_pml_nx_256_ny_256_nz_100_alpha_0.1.gif)|![](./docs/3D/Ez_3D_pml_nx_256_ny_256_nz_100_alpha_0.1.gif)|
 |:--:| :--: | :--: |
 | *Ex field*| *Ey field* | *Ez field* |
 
-|![](./docs/3D/Hx_3D_pml_nx_256_ny_256_nz_100_alpha_0.0.gif)|![](./docs/3D/Hy_3D_pml_nx_256_ny_256_nz_100_alpha_0.0.gif)|![](./docs/3D/Hz_3D_pml_nx_256_ny_256_nz_100_alpha_0.0.gif)|
+|![](./docs/3D/Hx_3D_pml_nx_256_ny_256_nz_100_alpha_0.1.gif)|![](./docs/3D/Hy_3D_pml_nx_256_ny_256_nz_100_alpha_0.1.gif)|![](./docs/3D/Hz_3D_pml_nx_256_ny_256_nz_100_alpha_0.1.gif)|
 |:--:| :--: | :--: |
 | *Hx field*| *Hy field* | *Hz field*|
 
@@ -528,6 +528,31 @@ TODO: ADD A SENTENCE TO EXPLAIN THE RESULTS
 
 
 2. $\text{pml alpha}=0.1$ (i.e. slightly PML boundary)
+
+By running the [3D_plotter_surfaces.jl](./docs/3D_plotter_surfaces.jl) file we get the value of each field ($E_x$, $E_y$, $E_z$, $H_x$, $H_x$, $H_z$) as a slice at index $nz/2$ (or $nz/2 - 1$).
+
+|![](./docs/3D/Ex_3D_pml_nx_256_ny_256_nz_100_alpha_0.1.png)|![](./docs/3D/Ey_3D_pml_nx_256_ny_256_nz_100_alpha_0.1.png)|![](./docs/3D/Ez_3D_pml_nx_256_ny_256_nz_100_alpha_0.1.png)|
+|:--:| :--: | :--: |
+| *Ex field at nz/2*| *Ey field at nz/2* | *Ez field at nz/2* |
+
+|![](./docs/3D/Hx_3D_pml_nx_256_ny_256_nz_100_alpha_0.1.png)|![](./docs/3D/Hy_3D_pml_nx_256_ny_256_nz_100_alpha_0.1.png)|![](./docs/3D/Hz_3D_pml_nx_256_ny_256_nz_100_alpha_0.1.png)|
+|:--:| :--: | :--: |
+| *Hx field at nz/2*| *Hy field at nz/2* | *Hz field at nz/2-1* |
+
+TODO: ADD A SENTENCE TO EXPLAIN THE RESULTS
+
+It is also possible using the [3D_plotter_animations.jl](./docs/3D_plotter_animations.jl) to generate some animations. To generate the animation we iterate over the $n_z$-values and we take the corresponding field `[:, :, k]` entry (where `k` is the iterate index). The PML layer is represented by the black rectangle.
+
+|![](./docs/3D/Ex_3D_pml_nx_256_ny_256_nz_100_alpha_0.1.gif)|![](./docs/3D/Ey_3D_pml_nx_256_ny_256_nz_100_alpha_0.1.gif)|![](./docs/3D/Ez_3D_pml_nx_256_ny_256_nz_100_alpha_0.1.gif)|
+|:--:| :--: | :--: |
+| *Ex field*| *Ey field* | *Ez field* |
+
+|![](./docs/3D/Hx_3D_pml_nx_256_ny_256_nz_100_alpha_0.1.gif)|![](./docs/3D/Hy_3D_pml_nx_256_ny_256_nz_100_alpha_0.1.gif)|![](./docs/3D/Hz_3D_pml_nx_256_ny_256_nz_100_alpha_0.1.gif)|
+|:--:| :--: | :--: |
+| *Hx field*| *Hy field* | *Hz field*|
+
+TODO: ADD A SENTENCE TO EXPLAIN THE RESULTS
+
 3. $\text{pml alpha}=5.0$ (i.e. PML boundary)
 
 ## Testing
