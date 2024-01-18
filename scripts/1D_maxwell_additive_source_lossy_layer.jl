@@ -320,6 +320,6 @@ function FDTD_1D(nx_, nt_, nvis_; src="exp", do_visu=false, do_test=false)
     return Array(E_z)
 end
 
-FDTD_1D(200, 450, 10; do_visu=true, src="exp")
+#FDTD_1D(200, 450, 10; do_visu=true, src="exp")
 #FDTD_1D(200, 450, 10; do_visu=true, src="sin")
 #FDTD_1D(200, 450, 10; do_visu=false, do_test=true, src="exp")

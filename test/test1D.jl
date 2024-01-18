@@ -50,7 +50,7 @@ Ez_ref = zeros(Float32, nx_ + 1)
 Ez_ref = load("../test/ref_Ez_1D_cpu.jld")
 array_value = Ez_ref["data"]
 
-@testset "Reference Test: Ez_ref = Ez" begin
+@testset "Reference Test: Ez_ref ≈ Ez" begin
     @test isapprox(Ez, array_value)
 end
 

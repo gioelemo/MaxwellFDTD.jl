@@ -59,6 +59,6 @@ Hz_ref = zeros(Float32, nx_pml, ny_pml)
 Hz_ref = load("../test/ref_Hz_2D_cpu.jld")
 array_value = Hz_ref["data"]
 
-@testset "Reference Test: Hz_ref = Hz" begin
+@testset "Reference Test: Hz_ref ≈ Hz" begin
     @test isapprox(Hz, array_value)
 end
