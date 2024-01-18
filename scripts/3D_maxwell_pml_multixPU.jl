@@ -147,97 +147,83 @@ Update the PML for the Ez field in the z-direction
     return nothing
 end
 
-@views function maxwell()
-    # physics
-    lx, ly, lz = 40.0, 40.0, 40.0
-    ε0 = 1.0
-    μ0 = 1.0
-    σ = 1.0
-    pml_width = 10
-    pml_alpha = 0.1
+"""
+    maxwell(nx_, ny_, nz_, nt_, pml_alpha_; do_visu=false, do_test=true)
 
-    # numerics
-    nx, ny, nz = 256, 256, 100
+Use the Finite Difference Time Domain (FDTD) solver to solve Maxwell's equations
+
+# Arguments
+- `nx_::Integer`: Number of x discretization-steps.
+- `ny_::Integer`: Number of y discretization-steps.
+- `nz_::Integer`: Number of z discretization-steps.
+- `nt_::Integer`: Number of timesteps.
+- `pml_alpha_::Float` : "Strength" of the PML layer
+- `do_visu::Boolean=false`: Perform visualisation.
+- `do_test::Boolean=false`: Perform testing (generate a jld reference file).
+"""
+@views function maxwell(nx_, ny_, nz_, nt_, pml_alpha_; do_visu=false, do_test=true)
+    # Physics
+    lx, ly, lz = 40.0, 40.0, 40.0   # physical size
+    ε0 = 1.0                        # permittivity
+    μ0 = 1.0                        # permeability
+    σ = 1.0                         # electrical conductivity
+
+    # Numerics
+    nx, ny, nz = nx_, ny_, nz_      # number space steps
+    
+    # PML parameters
+    pml_width = 10                  # PML extensions
+    pml_alpha = pml_alpha_          # PML "strength"
     
     # Extend the grid
     nx_pml, ny_pml, nz_pml = nx + 2 * pml_width, ny + 2 * pml_width, nz + 2 * pml_width
 
+    # Initialize the global grid
     me, dims = init_global_grid(nx_pml, ny_pml, nz_pml)
-    
     dx, dy, dz = lx / nx_g(), ly / ny_g(), lz / nz_g()
-    #xc = LinRange(-lx / 2 + dx / 2, lx / 2 - dx / 2, nx_pml)
-    #yc = LinRange(-ly / 2 + dy / 2, ly / 2 - dy / 2, ny_pml)
-    #zc = LinRange(-lz / 2 + dz / 2, lz / 2 - dz / 2, nz_pml)
     dt = min(dx, dy, dz)^2 / (1 / ε0 / μ0) / 4.1
-    nt = 15000
+    nt = nt_
 
-    # initial conditions
+    # Initial conditions
+    # E-fields
     Ex = @zeros(nx_pml, ny_pml + 1, nz_pml + 1)
     Ey = @zeros(nx_pml + 1, ny_pml, nz_pml + 1)
     Ez = @zeros(nx_pml + 1, ny_pml + 1, nz_pml)
     
+    # H-fields
     Hx = @zeros(nx_pml - 1, ny_pml, nz_pml)
     Hy = @zeros(nx_pml, ny_pml  - 1, nz_pml)
     Hz = @zeros(nx_pml, ny_pml, nz_pml - 1)
 
-    #Hx = Data.Array([exp(-(xc[ix] - lx / 2)^2 - (yc[iy] - ly / 2)^2 - (zc[iz] - lz / 2)^2) for ix = 1:nx_pml-1, iy = 1:ny_pml, iz = 1:nz_pml])
-    #Hy = Data.Array([exp(-(xc[ix] - lx / 2)^2 - (yc[iy] - ly / 2)^2 - (zc[iz] - lz / 2)^2) for ix = 1:nx_pml, iy = 1:ny_pml-1, iz = 1:nz_pml])
-    #Hz = Data.Array([exp(-(xc[ix] - lx / 2)^2 - (yc[iy] - ly / 2)^2 - (zc[iz] - lz / 2)^2) for ix = 1:nx_pml, iy = 1:ny_pml, iz = 1:nz_pml-1])
-
-    # Hx .= Data.Array([exp(- (x_g(ix, dx, Hx) + dx / 2 - lx / 2)^2 
-    #                      - (y_g(iy, dy, Hx) + dy / 2 - ly / 2)^2 
-    #                      - (z_g(iz, dz, Hx) + dz / 2 - lz / 2)^2) for ix = 1:nx_pml-1, iy = 1:ny_pml, iz = 1:nz_pml])
-
-    # Hy .= Data.Array([exp(- (x_g(ix, dx, Hy) + dx / 2 - lx / 2)^2 
-    #                      - (y_g(iy, dy, Hy) + dy / 2 - ly / 2)^2 
-    #                      - (z_g(iz, dz, Hy) + dz / 2 - lz / 2)^2) for ix = 1:nx_pml, iy = 1:ny_pml-1, iz = 1:nz_pml])
-                                              
-    # Hz .= Data.Array([exp(- (x_g(ix, dx, Hz) + dx / 2 - lx / 2)^2 
-    #                      - (y_g(iy, dy, Hz) + dy / 2 - ly / 2)^2 
-    #                      - (z_g(iz, dz, Hz) + dz / 2 - lz / 2)^2) for ix = 1:nx_pml, iy = 1:ny_pml, iz = 1:nz_pml-1])
-
-    Hx .= Data.Array([exp(- (x_g(ix, dx, Hx))^2 
-                         - (y_g(iy, dy, Hx))^2 
-                         - (z_g(iz, dz, Hx))^2) for ix = 1:nx_pml-1, iy = 1:ny_pml, iz = 1:nz_pml])
-
-    Hy .= Data.Array([exp(- (x_g(ix, dx, Hy))^2 
-                         - (y_g(iy, dy, Hy))^2 
-                         - (z_g(iz, dz, Hy))^2) for ix = 1:nx_pml, iy = 1:ny_pml-1, iz = 1:nz_pml])
-                                              
-    Hz .= Data.Array([exp(- (x_g(ix, dx, Hz))^2 
-                         - (y_g(iy, dy, Hz))^2 
-                         - (z_g(iz, dz, Hz))^2) for ix = 1:nx_pml, iy = 1:ny_pml, iz = 1:nz_pml-1])
+    # Gaussian initial condition
+    Hx .= Data.Array([exp(- (x_g(ix, dx, Hx))^2 - (y_g(iy, dy, Hx))^2 - (z_g(iz, dz, Hx))^2) for ix = 1:nx_pml-1, iy = 1:ny_pml, iz = 1:nz_pml])
+    Hy .= Data.Array([exp(- (x_g(ix, dx, Hy))^2 - (y_g(iy, dy, Hy))^2 - (z_g(iz, dz, Hy))^2) for ix = 1:nx_pml, iy = 1:ny_pml-1, iz = 1:nz_pml])
+    Hz .= Data.Array([exp(- (x_g(ix, dx, Hz))^2 - (y_g(iy, dy, Hz))^2 - (z_g(iz, dz, Hz))^2) for ix = 1:nx_pml, iy = 1:ny_pml, iz = 1:nz_pml-1])
 
     update_halo!(Hx, Hy, Hz)
-    # WRONG INIT
-    #Hx = [exp(-(xc[ix])^2 - (yc[iy])^2 - (zc[iz])^2) for ix = 1:nx-1, iy = 1:ny, iz = 1:nz]
-    #Hy = [exp(-(xc[ix])^2 - (yc[iy])^2 - (zc[iz])^2) for ix = 1:nx, iy = 1:ny-1, iz = 1:nz]
-    #Hz = [exp(-(xc[ix])^2 - (yc[iy])^2 - (zc[iz])^2) for ix = 1:nx, iy = 1:ny, iz = 1:nz-1]
-
+    
+    # Derivative matrix
     dy_Ez = @zeros(nx_pml + 1, ny_pml, nz_pml)
     dz_Ey = @zeros(nx_pml + 1, ny_pml, nz_pml)
     dz_Ex = @zeros(nx_pml, ny_pml + 1, nz_pml)
     dx_Ez = @zeros(nx_pml, ny_pml + 1, nz_pml)
     dy_Ex = @zeros(nx_pml, ny_pml, nz_pml + 1)
     dx_Ey = @zeros(nx_pml, ny_pml, nz_pml + 1)
-
-    println("init ok")
+    
+    # Timestepping
     for it in 1:nt
 
         # Update Ex field
         @parallel (1:size(Ex, 1), 1:size(Ex, 2)-2, 1:size(Ex, 3) - 2) update_Ex!(Ex, dt, ε0, σ, Hy, Hz, dy, dz)
         update_halo!(Ex)
-        #println("ex ok")
 
         # Update Ey field
         @parallel (1:size(Ey, 1) - 2, 1:size(Ey, 2), 1:size(Ey, 3) - 2) update_Ey!(Ey, dt, ε0, σ, Hx, Hz, dx, dz)
         update_halo!(Ey)
-        #println("ey ok")
 
         # Update Ez field
         @parallel (1:size(Ez, 1) - 2, 1:size(Ez, 2) - 2, 1:size(Ez, 3)) update_Ez!(Ez, dt, ε0, σ, Hx, Hy, dx, dy)
         update_halo!(Ez)
-        #println("ez ok")
 
         # Update PML
         if pml_width > 0
@@ -254,7 +240,6 @@ end
         update_halo!(dz_Ey)
         @parallel (1:size(Hx, 1), 1:size(Hx, 2), 1:size(Hx, 3)) update_Hx!(Hx, dt, μ0, σ, Ey, dz_Ey, Ez, dy_Ez, dy, dz)
         update_halo!(Hx)
-        #println("Hx ok")
 
         # Compute derivative and update Hy field
         @parallel compute_d_za!(Ex, dz_Ex)
@@ -263,7 +248,6 @@ end
         update_halo!(dx_Ez)
         @parallel (1:size(Hy, 1), 1:size(Hy, 2), 1:size(Hy, 3)) update_Hy!(Hy, dt, μ0, σ, Ex, dz_Ex, Ez, dx_Ez, dx, dz)
         update_halo!(Hy)
-        #println("Hy ok")
 
         # Compute derivative and update Hy field
         @parallel compute_d_ya!(Ex, dy_Ex)
@@ -272,17 +256,18 @@ end
         update_halo!(dx_Ey)
         @parallel (1:size(Hz, 1), 1:size(Hz, 2), 1:size(Hz, 3)) update_Hz!(Hz, dt, μ0, σ, Ex, dy_Ex, Ey, dx_Ey, dx, dy)
         update_halo!(Hz)
-        #println("Hz ok")
         
-        println(it)
-        
+        if do_test == false
+            println(it)
+        end        
     end
-
 
     update_halo!(Ex, Ey, Ez, Hx, Hy, Hz, dy_Ez, dz_Ey, dz_Ex, dx_Ez, dy_Ex, dx_Ey)
     finalize_global_grid();
 
+    # Visualisation
     if me == 0
+        # Save the final fields into array
         save_array("../docs/out_Ex",convert.(Float32,Array(Ex)))
         save_array("../docs/out_Ey",convert.(Float32,Array(Ey)))
         save_array("../docs/out_Ez",convert.(Float32,Array(Ez)))
@@ -292,7 +277,9 @@ end
         save_array("../docs/out_Hz",convert.(Float32,Array(Hz)))
     end
     
-    return
+    return Array(Hz)
 end
 
-maxwell()
+#maxwell(nx_, ny_, nz_, nt_, pml_alpha_; do_visu=false, do_test=true)
+
+maxwell(256, 256, 100, 15000, 0.1; do_visu=true, do_test=false)

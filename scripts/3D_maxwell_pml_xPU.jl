@@ -207,8 +207,6 @@ Use the Finite Difference Time Domain (FDTD) solver to solve Maxwell's equations
     dx_Ez = @zeros(nx_pml, ny_pml + 1, nz_pml)
     dy_Ex = @zeros(nx_pml, ny_pml, nz_pml + 1)
     dx_Ey = @zeros(nx_pml, ny_pml, nz_pml + 1)
-
-    #println("init ok")
     
     # Timestepping
     for it in 1:nt
@@ -273,7 +271,6 @@ Use the Finite Difference Time Domain (FDTD) solver to solve Maxwell's equations
     return Array(Hz)
 end
 
-#maxwell()
 
 #maxwell(nx_, ny_, nz_, nt_, pml_alpha_; do_visu=false, do_test=true)
 
