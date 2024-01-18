@@ -1,5 +1,6 @@
-const USE_GPU = false
+const USE_GPU = true
 using ImplicitGlobalGrid
+import MPI
 using ParallelStencil
 using ParallelStencil.FiniteDifferences3D
 @static if USE_GPU
@@ -20,64 +21,127 @@ function save_array(Aname,A)
     out = open(fname,"w"); write(out,A); close(out)
 end
 
+"""
+    compute_d_xa!(A, dA)
+
+Helper (parallel) function to compute the derivative of a matrix A 
+in the dimension x and store the result into dA
+"""
 @parallel function compute_d_xa!(A, dA)
     @all(dA) = @d_xa(A)
     return nothing
 end
 
+"""
+    compute_d_ya!(A, dA)
+
+Helper (parallel) function to compute the derivative of a matrix A 
+in the dimension y and store the result into dA
+"""
 @parallel function compute_d_ya!(A, dA)
     @all(dA) = @d_ya(A)
     return nothing
 end
 
+"""
+    compute_d_za!(A, dA)
+
+Helper (parallel) function to compute the derivative of a matrix A 
+in the dimension z and store the result into dA
+"""
 @parallel function compute_d_za!(A, dA)
     @all(dA) = @d_za(A)
     return nothing
 end
 
+"""
+    update_Ex!(Ex, dt, ε0, σ, Hy, Hz, dy, dz)
+
+Update the Ex field
+"""
 @parallel_indices (i, j, k) function update_Ex!(Ex, dt, ε0, σ, Hy, Hz, dy, dz)
     Ex[i, j + 1, k + 1] = Ex[i, j + 1, k + 1] + dt / ε0 * (-σ * Ex[i, j + 1, k + 1] + @d_ya(Hz) / dy - @d_za(Hy) / dz)
     return nothing    
 end
 
+"""
+    update_Ey!(Ey, dt, ε0, σ, Hx, Hz, dx, dz)
+
+Update the Ey field
+"""
 @parallel_indices (i, j, k) function update_Ey!(Ey, dt, ε0, σ, Hx, Hz, dx, dz)
     Ey[i + 1, j, k + 1] = Ey[i + 1, j, k + 1] + dt / ε0 * (-σ * Ey[i + 1, j, k + 1] + @d_za(Hx) / dz - @d_xa(Hz) / dx)
     return nothing
 end
 
+"""
+    update_Ez!(Ez, dt, ε0, σ, Hx, Hy, dx, dy)
+
+Update the Ez field
+"""
 @parallel_indices (i, j, k) function update_Ez!(Ez, dt, ε0, σ, Hx, Hy, dx, dy)
     Ez[i + 1, j + 1, k] = Ez[i + 1, j + 1, k] + dt / ε0 * (-σ * Ez[i + 1, j + 1, k]  + @d_xa(Hy) / dx - @d_ya(Hx) / dy)
     return nothing
 end
 
+"""
+    update_Hx!(Hx, dt, μ0, σ, Ey, dz_Ey, Ez, dy_Ez, dy, dz)
+
+Update the Hx field
+"""
 @parallel_indices (i, j, k) function update_Hx!(Hx, dt, μ0, σ, Ey, dz_Ey, Ez, dy_Ez, dy, dz)
     Hx[i, j, k] = Hx[i, j, k] + dt / μ0 * (-σ * Hx[i, j, k] + dz_Ey[i + 1, j, k] / dz - dy_Ez[i + 1, j, k] / dy)
     return nothing
 end
 
+"""
+    update_Hy!(Hy, dt, μ0, σ, Ex, dz_Ex, Ez, dx_Ez, dx, dz)
+
+Update the Hy field
+"""
 @parallel_indices (i, j, k) function update_Hy!(Hy, dt, μ0, σ, Ex, dz_Ex, Ez, dx_Ez, dx, dz)
     Hy[i, j, k] = Hy[i, j, k] + dt / μ0 * (-σ * Hy[i, j, k] + dx_Ez[i, j + 1, k] / dx - dz_Ex[i, j + 1, k] / dz)
     return nothing
 end
 
+"""
+    update_Hz!(Hz, dt, μ0, σ, Ex, dy_Ex, Ey, dx_Ey, dx, dy)
+
+Update the Hz field
+"""
 @parallel_indices (i, j, k) function update_Hz!(Hz, dt, μ0, σ, Ex, dy_Ex, Ey, dx_Ey, dx, dy)
     Hz[i, j, k] = Hz[i, j, k] + dt / μ0 * (-σ * Hz[i, j, k] + dy_Ex[i, j, k + 1] / dy - dx_Ey[i, j, k + 1] / dx)
     return nothing
 end
 
-@parallel_indices (i,j,k) function update_PML_x!(pml_width, pml_alpha, Ex)
+"""
+    update_PML_x!(pml_width, pml_alpha, Ex)
+
+Update the PML for the Ex field in the x-direction
+"""
+@parallel_indices (i, j, k) function update_PML_x!(pml_width, pml_alpha, Ex)
     Ex[i, j, k] = exp(-(pml_width - i) * pml_alpha) * Ex[i, j, k]
     Ex[end - i + 1, j, k] = exp(-(pml_width - i) * pml_alpha) * Ex[end - i + 1, j, k]
     return nothing
 end
 
-@parallel_indices (i,j,k) function update_PML_y!(pml_width, pml_alpha, Ey)
+"""
+    update_PML_y!(pml_width, pml_alpha, Ey)
+
+Update the PML for the Ey field in the y-direction
+"""
+@parallel_indices (i, j, k) function update_PML_y!(pml_width, pml_alpha, Ey)
     Ey[i, j, k] = exp(-(pml_width - j) * pml_alpha) * Ey[i, j, k]
     Ey[i, end - j + 1, k] = exp(-(pml_width - j) * pml_alpha) * Ey[i, end - j + 1 , k]
     return nothing
 end
 
-@parallel_indices (i,j,k) function update_PML_z!(pml_width, pml_alpha, Ez)
+"""
+    update_PML_z!(pml_width, pml_alpha, Ez)
+
+Update the PML for the Ez field in the z-direction
+"""
+@parallel_indices (i, j, k) function update_PML_z!(pml_width, pml_alpha, Ez)
     Ez[i, j, k] = exp(-(pml_width - k) * pml_alpha) * Ez[i, j, k]
     Ez[i, j, end - k + 1] = exp(-(pml_width - k) * pml_alpha) * Ez[i, j, end - k + 1]
     return nothing
@@ -93,7 +157,7 @@ end
     pml_alpha = 0.1
 
     # numerics
-    nx, ny, nz = 100, 100, 100
+    nx, ny, nz = 256, 256, 100
     
     # Extend the grid
     nx_pml, ny_pml, nz_pml = nx + 2 * pml_width, ny + 2 * pml_width, nz + 2 * pml_width
@@ -105,8 +169,7 @@ end
     #yc = LinRange(-ly / 2 + dy / 2, ly / 2 - dy / 2, ny_pml)
     #zc = LinRange(-lz / 2 + dz / 2, lz / 2 - dz / 2, nz_pml)
     dt = min(dx, dy, dz)^2 / (1 / ε0 / μ0) / 4.1
-    nt = 1000
-    nout = 1e2
+    nt = 15000
 
     # initial conditions
     Ex = @zeros(nx_pml, ny_pml + 1, nz_pml + 1)
@@ -121,17 +184,29 @@ end
     #Hy = Data.Array([exp(-(xc[ix] - lx / 2)^2 - (yc[iy] - ly / 2)^2 - (zc[iz] - lz / 2)^2) for ix = 1:nx_pml, iy = 1:ny_pml-1, iz = 1:nz_pml])
     #Hz = Data.Array([exp(-(xc[ix] - lx / 2)^2 - (yc[iy] - ly / 2)^2 - (zc[iz] - lz / 2)^2) for ix = 1:nx_pml, iy = 1:ny_pml, iz = 1:nz_pml-1])
 
-    Hx .= Data.Array([exp(- (x_g(ix, dx, Hx) + dx / 2 - lx / 2)^2 
-                         - (y_g(iy, dy, Hx) + dy / 2 - ly / 2)^2 
-                         - (z_g(iz, dz, Hx) + dz / 2 - lz / 2)^2) for ix = 1:nx_pml-1, iy = 1:ny_pml, iz = 1:nz_pml])
+    # Hx .= Data.Array([exp(- (x_g(ix, dx, Hx) + dx / 2 - lx / 2)^2 
+    #                      - (y_g(iy, dy, Hx) + dy / 2 - ly / 2)^2 
+    #                      - (z_g(iz, dz, Hx) + dz / 2 - lz / 2)^2) for ix = 1:nx_pml-1, iy = 1:ny_pml, iz = 1:nz_pml])
 
-    Hy .= Data.Array([exp(- (x_g(ix, dx, Hy) + dx / 2 - lx / 2)^2 
-                         - (y_g(iy, dy, Hy) + dy / 2 - ly / 2)^2 
-                         - (z_g(iz, dz, Hy) + dz / 2 - lz / 2)^2) for ix = 1:nx_pml, iy = 1:ny_pml-1, iz = 1:nz_pml])
+    # Hy .= Data.Array([exp(- (x_g(ix, dx, Hy) + dx / 2 - lx / 2)^2 
+    #                      - (y_g(iy, dy, Hy) + dy / 2 - ly / 2)^2 
+    #                      - (z_g(iz, dz, Hy) + dz / 2 - lz / 2)^2) for ix = 1:nx_pml, iy = 1:ny_pml-1, iz = 1:nz_pml])
                                               
-    Hz .= Data.Array([exp(- (x_g(ix, dx, Hz) + dx / 2 - lx / 2)^2 
-                         - (y_g(iy, dy, Hz) + dy / 2 - ly / 2)^2 
-                         - (z_g(iz, dz, Hz) + dz / 2 - lz / 2)^2) for ix = 1:nx_pml, iy = 1:ny_pml, iz = 1:nz_pml-1])
+    # Hz .= Data.Array([exp(- (x_g(ix, dx, Hz) + dx / 2 - lx / 2)^2 
+    #                      - (y_g(iy, dy, Hz) + dy / 2 - ly / 2)^2 
+    #                      - (z_g(iz, dz, Hz) + dz / 2 - lz / 2)^2) for ix = 1:nx_pml, iy = 1:ny_pml, iz = 1:nz_pml-1])
+
+    Hx .= Data.Array([exp(- (x_g(ix, dx, Hx))^2 
+                         - (y_g(iy, dy, Hx))^2 
+                         - (z_g(iz, dz, Hx))^2) for ix = 1:nx_pml-1, iy = 1:ny_pml, iz = 1:nz_pml])
+
+    Hy .= Data.Array([exp(- (x_g(ix, dx, Hy))^2 
+                         - (y_g(iy, dy, Hy))^2 
+                         - (z_g(iz, dz, Hy))^2) for ix = 1:nx_pml, iy = 1:ny_pml-1, iz = 1:nz_pml])
+                                              
+    Hz .= Data.Array([exp(- (x_g(ix, dx, Hz))^2 
+                         - (y_g(iy, dy, Hz))^2 
+                         - (z_g(iz, dz, Hz))^2) for ix = 1:nx_pml, iy = 1:ny_pml, iz = 1:nz_pml-1])
 
     update_halo!(Hx, Hy, Hz)
     # WRONG INIT
@@ -174,21 +249,27 @@ end
 
         # Compute derivative and update Hx field
         @parallel compute_d_ya!(Ez, dy_Ez)
+        update_halo!(dy_Ez)
         @parallel compute_d_za!(Ey, dz_Ey)
+        update_halo!(dz_Ey)
         @parallel (1:size(Hx, 1), 1:size(Hx, 2), 1:size(Hx, 3)) update_Hx!(Hx, dt, μ0, σ, Ey, dz_Ey, Ez, dy_Ez, dy, dz)
         update_halo!(Hx)
         #println("Hx ok")
 
         # Compute derivative and update Hy field
         @parallel compute_d_za!(Ex, dz_Ex)
+        update_halo!(dz_Ex)
         @parallel compute_d_xa!(Ez, dx_Ez)
+        update_halo!(dx_Ez)
         @parallel (1:size(Hy, 1), 1:size(Hy, 2), 1:size(Hy, 3)) update_Hy!(Hy, dt, μ0, σ, Ex, dz_Ex, Ez, dx_Ez, dx, dz)
         update_halo!(Hy)
         #println("Hy ok")
 
         # Compute derivative and update Hy field
         @parallel compute_d_ya!(Ex, dy_Ex)
+        update_halo!(dy_Ex)
         @parallel compute_d_xa!(Ey, dx_Ey)
+        update_halo!(dx_Ey)
         @parallel (1:size(Hz, 1), 1:size(Hz, 2), 1:size(Hz, 3)) update_Hz!(Hz, dt, μ0, σ, Ex, dy_Ex, Ey, dx_Ey, dx, dy)
         update_halo!(Hz)
         #println("Hz ok")
@@ -198,7 +279,7 @@ end
     end
 
 
-    update_halo!(Ex, Ey, Ez, Hx, Hy, Hz)
+    update_halo!(Ex, Ey, Ez, Hx, Hy, Hz, dy_Ez, dz_Ey, dz_Ex, dx_Ez, dy_Ex, dx_Ey)
     finalize_global_grid();
 
     if me == 0
