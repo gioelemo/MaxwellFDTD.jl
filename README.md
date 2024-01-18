@@ -203,19 +203,19 @@ In this code is also additionally implemented:
 We first run the code for the Gaussian source case with the following parameters:
 
 ```julia
-nx   = 200    # number space steps
-nt   = 450    # number timesteps
-nvis = 10     # interval visualisation
-src  = "exp"  # Gaussian source
-imp0 = 377.0  # free space impedance
-loss = 0.02   # loss factor
-interface_index = 100  # interface index between free space-dielectric
-epsR = 9.0    # relative permittivity
+nx   = 200                   # number space steps
+nt   = 450                   # number timesteps
+nvis = 10                    # interval visualisation
+src  = "exp"                 # Gaussian source
+imp0 = 377.0                 # free space impedance
+loss = 0.02                  # loss factor
+interface_index = 100        # interface index between free space-dielectric
+epsR = 9.0                   # relative permittivity
 loss_layer_index     = 180   # loss layer index
 TSFS_boundary_index  = 50    # TSFS index
-Cdt_dx   = 1.0   # Courant's number
-width    = 100.0 # width of  Gaussian pulse
-location = 30.0  # location of Gaussian pulse
+Cdt_dx   = 1.0               # Courant's number
+width    = 100.0             # width of  Gaussian pulse
+location = 30.0              # location of Gaussian pulse
 ```
 
 After running the code with 
@@ -232,18 +232,18 @@ It is noteworthy that on the left part of the computational domain, the wave is 
 Similarly, as in the previous case, the code can be executed with a sine source using the following parameters:
 
 ```julia
-nx   = 200    # number space steps
-nt   = 450    # number timesteps
-nvis = 10     # interval visualisation
-src  = "sin"  # Sin source
-imp0 = 377.0  # free space impedance
-loss = 0.0253146   # loss factor
-interface_index = 100  # interface index between free space-dielectric
-epsR = 4.0       # relative permittivity
-N_lambda = 40.0  # number of points per wavelengths
-TSFS_boundary_index  = 50    # TSFS index
-Cdt_dx   = 1.0   # Courant's number
-location = 0.0   # location of Gaussian pulse
+nx   = 200                 # number space steps
+nt   = 450                 # number timesteps
+nvis = 10                  # interval visualisation
+src  = "sin"               # Sin source
+imp0 = 377.0               # free space impedance
+loss = 0.0253146           # loss factor
+interface_index = 100      # interface index between free space-dielectric
+epsR = 4.0                 # relative permittivity
+N_lambda = 40.0            # number of points per wavelengths
+TSFS_boundary_index  = 50  # TSFS index
+Cdt_dx   = 1.0             # Courant's number
+location = 0.0             # location of Gaussian pulse
 ```
 
 After running the code with 
@@ -516,11 +516,11 @@ TODO: ADD A SENTENCE TO EXPLAIN THE RESULTS
 
 It is also possible using the [3D_plotter_animations.jl](./docs/3D_plotter_animations.jl) to generate some animations. To generate the animation we iterate over the $n_z$-values and we take the corresponding field `[:, :, k]` entry (where `k` is the iterate index). The PML layer is represented by the black rectangle.
 
-|![](./docs/3D/Ex_3D_pml_nx_256_ny_256_nz_100_alpha_0.1.gif)|![](./docs/3D/Ey_3D_pml_nx_256_ny_256_nz_100_alpha_0.1.gif)|![](./docs/3D/Ez_3D_pml_nx_256_ny_256_nz_100_alpha_0.1.gif)|
+|![](./docs/3D/Ex_3D_pml_nx_256_ny_256_nz_100_alpha_0.0.gif)|![](./docs/3D/Ey_3D_pml_nx_256_ny_256_nz_100_alpha_0.0.gif)|![](./docs/3D/Ez_3D_pml_nx_256_ny_256_nz_100_alpha_0.0.gif)|
 |:--:| :--: | :--: |
 | *Ex field*| *Ey field* | *Ez field* |
 
-|![](./docs/3D/Hx_3D_pml_nx_256_ny_256_nz_100_alpha_0.1.gif)|![](./docs/3D/Hy_3D_pml_nx_256_ny_256_nz_100_alpha_0.1.gif)|![](./docs/3D/Hz_3D_pml_nx_256_ny_256_nz_100_alpha_0.1.gif)|
+|![](./docs/3D/Hx_3D_pml_nx_256_ny_256_nz_100_alpha_0.0.gif)|![](./docs/3D/Hy_3D_pml_nx_256_ny_256_nz_100_alpha_0.0.gif)|![](./docs/3D/Hz_3D_pml_nx_256_ny_256_nz_100_alpha_0.0.gif)|
 |:--:| :--: | :--: |
 | *Hx field*| *Hy field* | *Hz field*|
 
