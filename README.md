@@ -18,6 +18,7 @@
 - [3D FDTD](#3d-fdtd)
     -  [Mathematical Formulation](#mathematical-formulation-2)
     -  [Code](#code-2)
+    -  [*Beta* - MultixPU version of the code](#beta---multixpu-version-of-the-code)
 - [Testing](#testing)
 - [Results and conclusions](#results-and-conclusions)
 - [References](#references)
@@ -578,6 +579,26 @@ It is also possible using the [3D_plotter_animations.jl](./docs/3D_plotter_anima
 
 We can see from the animations that the values of all fields decrease very quickly. This is also due to the fact that we used a very high PML alpha value.
 
+### *Beta* - MultixPU version of the code.
+
+*Please note that this version of the code has not undergone extensive testing and may potentially suffer from multiple bugs.*
+
+Using the [ImplicitGlobalGrid.jl](https://github.com/eth-cscs/ImplicitGlobalGrid.jl) package, we can transform the code [3D_maxwell_pml_xPU.jl](/scripts/3D_maxwell_pml_xPU.jl) into a versions that works on both multiple CPUs and GPUs (xPUs, in short).
+
+This modified code can be found in [3D_maxwell_pml_multixPU.jl](/scripts/3D_maxwell_pml_multixPU.jl) and can be executed using `sbatch run 3D_maxwell_pml_multixPU.jl`.
+
+We can replicate one of the experiment of the previous section, specifically the one with $\text{pml alpha}=0.1$ (i.e. slightly PML boundary), and obtain the following results:
+
+|![](./docs/3D/Ex_3D_pml_nx_256_ny_256_nz_100_alpha_0.1_m.png)|![](./docs/3D/Ey_3D_pml_nx_256_ny_256_nz_100_alpha_0.1_m.png)|![](./docs/3D/Ez_3D_pml_nx_256_ny_256_nz_100_alpha_0.1_m.png)|
+|:--:| :--: | :--: |
+| *Ex field at nz/2*| *Ey field at nz/2* | *Ez field at nz/2* |
+
+|![](./docs/3D/Hx_3D_pml_nx_256_ny_256_nz_100_alpha_0.1_m.png)|![](./docs/3D/Hy_3D_pml_nx_256_ny_256_nz_100_alpha_0.1_m.png)|![](./docs/3D/Hz_3D_pml_nx_256_ny_256_nz_100_alpha_0.1_m.png)|
+|:--:| :--: | :--: |
+| *Hx field at nz/2*| *Hy field at nz/2* | *Hz field at nz/2-1* |
+
+These pictures are very similar to those obtained in the previous subsection. The animations have been omitted to reduce the quantity of pictures in this file, but they also exhibit a similar behavior to that observed in the previous subsection.
+
 ## Testing
 
 In all implementations (1D, 2D, 3D), we perform some unit and reference tests. For more details of the testing, we refer directly to the test files [test1D.jl](./test/test1D.jl), [test2D.jl](./test/test2D.jl), [test3D.jl](./test/test3D.jl). Please note that the coverage reported at the beginning of this file might be incorrect (did not have the time to find a fix).
@@ -593,11 +614,12 @@ The provided examples illustrate the solver's capabilities, including simulation
 Some possible extensions of the actual scripts could include:
 
 1. Varying PML width for each dimension.
-2. Incorporating more complex PML extensions.
-3. Exploring alternative types of Boundary Conditions.
-4. Enhancing the performance of the code through optimization and benchmarking.
-5. Introducing aesthetically pleasing visualizations.
-6. Expanding the test sets to cover additional field updates and addressing codecov integration.
+2. Test the multixPU version to make sure that it is actually correct.
+3. Incorporating more complex PML extensions.
+4. Exploring alternative types of Boundary Conditions.
+5. Enhancing the performance of the code through optimization and benchmarking.
+6. Introducing aesthetically pleasing visualizations.
+7. Expanding the test sets to cover additional field updates and addressing codecov integration.
 
 ## References
 
