@@ -17,7 +17,6 @@ default(fontfamily=plot_font, framestyle=:box, label=true, grid=true, labelfonts
 Update the Ex field
 """
 @parallel function update_Ex!(Ex, Hz, σ, ε0, dt, dy)
-    #Ex[:, 2:end-1] .+= dt / ε0 .* (-σ .* Ex[:, 2:end-1] .+ diff(Hz, dims=2)./ dy)
     @inn_y(Ex) = @inn_y(Ex) + dt / ε0 * (-σ * @inn_y(Ex) + @d_ya(Hz) / dy)
     return nothing
 end
@@ -28,7 +27,6 @@ end
 Update the Ey field
 """
 @parallel function update_Ey!(Ey, Hz, σ, ε0, dt, dx)
-    #Ey[2:end-1, :] .+= dt / ε0 .* (-σ .* Ey[2:end-1, :] .- diff(Hz, dims=1) ./ dx)
     @inn_x(Ey) = @inn_x(Ey) + dt / ε0 * (-σ * @inn_x(Ey) - @d_xa(Hz) / dx)
     return nothing
 end
@@ -39,15 +37,8 @@ end
 Update the x-regions of the pml
 """
 @parallel_indices (i,j) function update_PML_x!(pml_width, pml_alpha, Ex)
-    # for i in 1:pml_width
-    #     Ex[i, :] .= exp(-(pml_width - i) * pml_alpha) .* Ex[i, :]
-    #     Ex[end - i + 1, :] .= exp(-(pml_width - i) * pml_alpha) .* Ex[end - i + 1, :]
-    #     Ey[:, i] .= exp(-(pml_width - i) * pml_alpha) .* Ey[:, i]
-    #     Ey[:, end - i + 1] .= exp(-(pml_width - i) * pml_alpha) .* Ey[:, end - i + 1]
-    # end
     Ex[i, j] = exp(-(pml_width - i) * pml_alpha) * Ex[i, j]
     Ex[end - i + 1, j] = exp(-(pml_width - i) * pml_alpha) * Ex[end - i + 1, j]
-
     return nothing
 end
 
@@ -57,16 +48,8 @@ end
 Update the y-regions of the pml
 """
 @parallel_indices (i,j) function update_PML_y!(pml_width, pml_alpha, Ey)
-    # for i in 1:pml_width
-    #     Ex[i, :] .= exp(-(pml_width - i) * pml_alpha) .* Ex[i, :]
-    #     Ex[end - i + 1, :] .= exp(-(pml_width - i) * pml_alpha) .* Ex[end - i + 1, :]
-    #     Ey[:, i] .= exp(-(pml_width - i) * pml_alpha) .* Ey[:, i]
-    #     Ey[:, end - i + 1] .= exp(-(pml_width - i) * pml_alpha) .* Ey[:, end - i + 1]
-    # end
-
     Ey[j, i] = exp(-(pml_width - i) * pml_alpha) * Ey[j, i]
     Ey[j, end - i + 1] = exp(-(pml_width - i) * pml_alpha) * Ey[j, end - i + 1]
-
     return nothing
 end
 
@@ -76,13 +59,12 @@ end
 Update the Hz field
 """
 @parallel function update_Hz!(Hz, Ex, Ey, σ, μ0, dt, dy, dx)
-    #Hz .+= dt / μ0 .* (-σ .* Hz .+ diff(Ex, dims=2) ./ dy .- diff(Ey, dims=1) ./ dx)
     @all(Hz) = @all(Hz) + dt / μ0 * (-σ * @all(Hz) + @d_ya(Ex) / dy - @d_xa(Ey) / dx)
     return nothing
 end
     
 """
-    maxwell(ny_, nt_, nvis_, pml_alpha_; do_visu=false, do_check=true, do_test=true)
+    maxwell(ny_, nt_, nvis_, pml_alpha_; do_visu=false, do_test=true)
 
 Use the Finite Difference Time Domain (FDTD) solver to solve Maxwell's equations
 
@@ -152,7 +134,7 @@ Use the Finite Difference Time Domain (FDTD) solver to solve Maxwell's equations
         # Update H
         @parallel update_Hz!(Hz, Ex, Ey, σ, μ0, dt, dy, dx)
         
-
+        # Visualisation
         if it % nout == 0 && do_visu == true
             # Create a heatmap
             plt = heatmap(Array(Hz'), aspect_ratio=:equal, xlims=(1, nx_pml), ylims=(1, ny_pml), c=:turbo, title="\$H_z\$ at it=$it")
@@ -181,11 +163,13 @@ Use the Finite Difference Time Domain (FDTD) solver to solve Maxwell's equations
     return Array(Hz)
 end
 
-# ny, nt, nvis
-#maxwell(101, 1000, 100; do_visu=false, do_test=true)
+# ny, nt, nvis, pml_alpha
 
+# Functions used for testing
 #maxwell(50, 10, 10, 0.25; do_visu=false, do_test=true)
+#maxwell(50, 10, 10, 0.25; do_visu=true, do_test=false)
 
+# Function used for the simulations in README.md
 #maxwell(256, 15000, 100, 0.0; do_visu=true, do_test=false)
 #maxwell(256, 15000, 100, 5.0; do_visu=true, do_test=false)
 #maxwell(256, 15000, 100, 0.1; do_visu=true, do_test=false)
