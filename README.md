@@ -251,7 +251,7 @@ After running the code with
 
 |![](./docs/1D/Maxwell_1D_xpu_sin.gif)|
 |:--:|
-| *Maxwell FDTD 1D simulation $nx=200$, $nt=450$ - $E_z$ field, $\sin$ source* |
+| *Maxwell FDTD 1D simulation nx=200, nt=450 - E_z field, sin source* |
 
 Similar to the previous example, it is evident that the additive source is introduced at the TSFS boundary (at index 50). Subsequently, the "wave" propagates until reaching the interface between the free-space and the dielectric region (at index 100), where a portion undergoes reflection, and the remainder continues into the dielectric region. Notably, in this case, loss is introduced right at the beginning of the dielectric region in the simulation, leading to a gradual decrease in the magnitude of the wave.
 
