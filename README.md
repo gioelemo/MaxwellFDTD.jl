@@ -223,7 +223,7 @@ After running the code with
 
 |![](./docs/1D/Maxwell_1D_xpu_exp.gif)|
 |:--:| 
-| *Maxwell FDTD 1D simulation nx=200, nt=450 - Ez field, exp source* |
+| *Maxwell FDTD 1D simulation $nx=200$, $nt=450$ - $E_z$ field, $\exp$ source* |
 
 As observed, the additive source is introduced at the TSFS boundary (at index 50). Subsequently, the "wave" propagates until reaching the interface between the free-space and the dielectric region (at index 100), where a portion undergoes reflection, and the remainder continues into the dielectric region. Upon reaching the index of the lossy layer (at index 180), the simulation introduces loss, causing a reduction in the magnitude of the wave. 
 
@@ -251,7 +251,7 @@ After running the code with
 
 |![](./docs/1D/Maxwell_1D_xpu_sin.gif)|
 |:--:|
-| *Maxwell FDTD 1D simulation nx=200, nt=450 - Ez field, sin source* |
+| *Maxwell FDTD 1D simulation $nx=200$, $nt=450$ - $E_z$ field, $\sin$ source* |
 
 Similar to the previous example, it is evident that the additive source is introduced at the TSFS boundary (at index 50). Subsequently, the "wave" propagates until reaching the interface between the free-space and the dielectric region (at index 100), where a portion undergoes reflection, and the remainder continues into the dielectric region. Notably, in this case, loss is introduced right at the beginning of the dielectric region in the simulation, leading to a gradual decrease in the magnitude of the wave.
 
@@ -325,13 +325,13 @@ We can run the code using
 `sbatch run_2D_maxwell_pml_xPU.sh` (works for both CPU and GPU by changing the `USE_GPU` flag in the [2D_maxwell_pml_xPU](./scripts/2D_maxwell_pml_xPU.jl) file.) with the following parameters:
 
 ```julia
-# physics
+# Physics
 lx, ly = 40.0, 40.0    # physical size
 ε0 = 1.0               # permittivity
 μ0 = 1.0               # permeability
 σ = 1.0                # electrical conductivity
 
-# numerics
+# Numerics
 nx, ny = 255, 256      # number space steps
 
 # PML parameters
@@ -352,7 +352,7 @@ The resulting animation is given as:
 
 |![](./docs/2D/Maxwell_2D_xpu_alpha=000.gif)|
 |:--:|
-| *Maxwell FDTD 2D simulation nx=255, ny=256, nt=15000, nvis=100, alpha=0.0 - Hz field*|
+| *Maxwell FDTD 2D simulation $nx=255$, $ny=256$, $nt=15000$, $nvis=100$, $alpha=0.0$ - Hz field*|
 
 The black square represent the distinction between the original computational domain and the extended domain when adding the PML layer. 
 
@@ -364,7 +364,7 @@ The resulting animation is given as:
 
 |![](./docs/2D/Maxwell_2D_xpu_alpha=010.gif)|
 |:--:|
-| *Maxwell FDTD 2D simulation nx=255, ny=256, nt=15000, nvis=100, alpha=0.1 - Hz field*|
+| *Maxwell FDTD 2D simulation $nx=255$, $ny=256$, $nt=15000$, $nvis=100$, $alpha=0.1$ - $Hz$ field*|
 
 Different as the previous case we observe that some waves are partially absorbed by the PML because we use a value of $\text{pml alpha}=0.1$.
 
@@ -374,7 +374,7 @@ The resulting animation is given as:
 
 |![](./docs/2D/Maxwell_2D_xpu_alpha=500.gif)|
 |:--:|
-| *Maxwell FDTD 2D simulation nx=255, ny=256, nt=15000, nvis=100, alpha=5.0 - Hz field*|
+| *Maxwell FDTD 2D simulation $nx=255$, $ny=256$, $nt=15000$, $nvis=100$, $alpha=5.0$ - $Hz$ field*|
 
 Similar to the previous case we observe that some waves are partially absorbed by the PML because we use a value of $\text{pml alpha}=5.0$. The absorbtion is a bit big compared to the previous case, but it is very difficult to see from this animation.
 
@@ -473,28 +473,62 @@ The mathematical formulation of the previous subsection can be translated into c
 
 The structure of the code is similar to the one of the 2D code.
 
-TODO: results
-ALPHA =0.0
+We can run the code using
+`sbatch run_3D_maxwell_pml_xPU.sh` (works for both CPU and GPU by changing the `USE_GPU` flag in the [3D_maxwell_pml_xPU](./scripts/3D_maxwell_pml_xPU.jl) file.) with the following parameters (similar as the one used in the 2D example):
 
-SURFACES
+```julia
+# Physics
+lx, ly, lz = 40.0, 40.0, 40.0    # physical size
+ε0 = 1.0                         # permittivity
+μ0 = 1.0                         # permeability
+σ = 1.0                          # electrical conductivity
+
+# Numerics
+nx, ny, nz = 256, 256, 100       # number space steps
+
+# PML parameters
+pml_width = 50                   # PML extensions
+
+# Extend the grid
+nx_pml = nx + 2 * pml_width
+ny_pml = ny + 2 * pml_width
+nz_pml = nz + 2 * pml_width
+
+nt   = 15000                     # number of time steps
+```
+
+
+Also for the 3D case, we test the code with different values of $\text{pml alpha}$
+
+1. $\text{pml alpha}=0.0$ (i.e. no PML boundary)
+
+By running the [3D_plotter_surfaces.jl](./docs/3D_plotter_surfaces.jl) file we get the value of each field ($E_x$, $E_y$, $E_z$, $H_x$, $H_x$, $H_z$) as a slice at index $nz/2$ (or $nz/2 - 1$).
 
 |![](./docs/3D/Ex_3D_pml_nx_256_ny_256_nz_100_alpha_0.0.png)|![](./docs/3D/Ey_3D_pml_nx_256_ny_256_nz_100_alpha_0.0.png)|![](./docs/3D/Ez_3D_pml_nx_256_ny_256_nz_100_alpha_0.0.png)|
 |:--:| :--: | :--: |
-| *Ex field at nz/2*| *Ey field at nz/2* | *Ez field at nz/2* |
+| *$E_x$ field at $nz/2$*| *$Ey$ field at $nz/2$* | *$Ez$ field at $nz/2$* |
 
 |![](./docs/3D/Hx_3D_pml_nx_256_ny_256_nz_100_alpha_0.0.png)|![](./docs/3D/Hy_3D_pml_nx_256_ny_256_nz_100_alpha_0.0.png)|![](./docs/3D/Hz_3D_pml_nx_256_ny_256_nz_100_alpha_0.0.png)|
 |:--:| :--: | :--: |
-| *Hx field at nz/2*| *Hy field at nz/2* | *Hz field at nz/2-1* |
+| *$Hx$ field at $nz/2$*| *$Hy$ field at $nz/2$* | *$Hz$ field at $nz/2-1$* |
 
-ANIMATIONS
+TODO: ADD A SENTENCE TO EXPLAIN THE RESULTS
+
+It is also possible using the [3D_plotter_animations.jl](./docs/3D_plotter_animations.jl) to generate some animations. To generate the animation we iterate over the $n_z$-values and we take the corresponding field `[:, :, k]` entry (where `k` is the iterate index). The PML layer is represented by the black rectangle.
 
 |![](./docs/3D/Ex_3D_pml_nx_256_ny_256_nz_100_alpha_0.0.gif)|![](./docs/3D/Ey_3D_pml_nx_256_ny_256_nz_100_alpha_0.0.gif)|![](./docs/3D/Ez_3D_pml_nx_256_ny_256_nz_100_alpha_0.0.gif)|
 |:--:| :--: | :--: |
-| *Ex field*| *Ey field* | *Ez field* |
+| *$E_x$ field*| *$E_y$ field* | *$E_z$ field* |
 
 |![](./docs/3D/Hx_3D_pml_nx_256_ny_256_nz_100_alpha_0.0.gif)|![](./docs/3D/Hy_3D_pml_nx_256_ny_256_nz_100_alpha_0.0.gif)|![](./docs/3D/Hz_3D_pml_nx_256_ny_256_nz_100_alpha_0.0.gif)|
 |:--:| :--: | :--: |
-| *Hx field*| *Hy field* | *Hz field*|
+| *$H_x$ field*| *$H_y$ field* | *$H_z$ field*|
+
+TODO: ADD A SENTENCE TO EXPLAIN THE RESULTS
+
+
+2. $\text{pml alpha}=0.1$ (i.e. slightly PML boundary)
+3. $\text{pml alpha}=5.0$ (i.e. PML boundary)
 
 ## Testing
 
