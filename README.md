@@ -352,7 +352,7 @@ The resulting animation is given as:
 
 |![](./docs/2D/Maxwell_2D_xpu_alpha=000.gif)|
 |:--:|
-| *Maxwell FDTD 2D simulation $nx=255$, $ny=256$, $nt=15000$, $nvis=100$, $alpha=0.0$ - Hz field*|
+| *Maxwell FDTD 2D simulation nx=255, ny=256, nt=15000, nvis=100, alpha=0.0 - Hz field*|
 
 The black square represent the distinction between the original computational domain and the extended domain when adding the PML layer. 
 
@@ -364,7 +364,7 @@ The resulting animation is given as:
 
 |![](./docs/2D/Maxwell_2D_xpu_alpha=010.gif)|
 |:--:|
-| *Maxwell FDTD 2D simulation $nx=255$, $ny=256$, $nt=15000$, $nvis=100$, $alpha=0.1$ - $Hz$ field*|
+| *Maxwell FDTD 2D simulation nx=255, ny=256, nt=15000, nvis=100, alpha=0.1 - Hz field*|
 
 Different as the previous case we observe that some waves are partially absorbed by the PML because we use a value of $\text{pml alpha}=0.1$.
 
@@ -374,7 +374,7 @@ The resulting animation is given as:
 
 |![](./docs/2D/Maxwell_2D_xpu_alpha=500.gif)|
 |:--:|
-| *Maxwell FDTD 2D simulation $nx=255$, $ny=256$, $nt=15000$, $nvis=100$, $alpha=5.0$ - $Hz$ field*|
+| *Maxwell FDTD 2D simulation nx=255, ny=256, nt=15000, nvis=100, alpha=5.0 - Hz field*|
 
 Similar to the previous case we observe that some waves are partially absorbed by the PML because we use a value of $\text{pml alpha}=5.0$. The absorbtion is a bit big compared to the previous case, but it is very difficult to see from this animation.
 
@@ -506,11 +506,11 @@ By running the [3D_plotter_surfaces.jl](./docs/3D_plotter_surfaces.jl) file we g
 
 |![](./docs/3D/Ex_3D_pml_nx_256_ny_256_nz_100_alpha_0.0.png)|![](./docs/3D/Ey_3D_pml_nx_256_ny_256_nz_100_alpha_0.0.png)|![](./docs/3D/Ez_3D_pml_nx_256_ny_256_nz_100_alpha_0.0.png)|
 |:--:| :--: | :--: |
-| *$E_x$ field at $nz/2$*| *$Ey$ field at $nz/2$* | *$Ez$ field at $nz/2$* |
+| *Ex field at nz/2*| *Ey field at nz/2* | *Ez field at nz/2* |
 
 |![](./docs/3D/Hx_3D_pml_nx_256_ny_256_nz_100_alpha_0.0.png)|![](./docs/3D/Hy_3D_pml_nx_256_ny_256_nz_100_alpha_0.0.png)|![](./docs/3D/Hz_3D_pml_nx_256_ny_256_nz_100_alpha_0.0.png)|
 |:--:| :--: | :--: |
-| *$Hx$ field at $nz/2$*| *$Hy$ field at $nz/2$* | *$Hz$ field at $nz/2-1$* |
+| *Hx field at nz/2*| *Hy field at nz/2* | *Hz field at nz/2-1* |
 
 TODO: ADD A SENTENCE TO EXPLAIN THE RESULTS
 
@@ -518,11 +518,11 @@ It is also possible using the [3D_plotter_animations.jl](./docs/3D_plotter_anima
 
 |![](./docs/3D/Ex_3D_pml_nx_256_ny_256_nz_100_alpha_0.0.gif)|![](./docs/3D/Ey_3D_pml_nx_256_ny_256_nz_100_alpha_0.0.gif)|![](./docs/3D/Ez_3D_pml_nx_256_ny_256_nz_100_alpha_0.0.gif)|
 |:--:| :--: | :--: |
-| *$E_x$ field*| *$E_y$ field* | *$E_z$ field* |
+| *Ex field*| *Ey field* | *Ez field* |
 
 |![](./docs/3D/Hx_3D_pml_nx_256_ny_256_nz_100_alpha_0.0.gif)|![](./docs/3D/Hy_3D_pml_nx_256_ny_256_nz_100_alpha_0.0.gif)|![](./docs/3D/Hz_3D_pml_nx_256_ny_256_nz_100_alpha_0.0.gif)|
 |:--:| :--: | :--: |
-| *$H_x$ field*| *$H_y$ field* | *$H_z$ field*|
+| *Hx field*| *Hy field* | *Hz field*|
 
 TODO: ADD A SENTENCE TO EXPLAIN THE RESULTS
 
