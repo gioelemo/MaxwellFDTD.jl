@@ -12,4 +12,4 @@
 module load daint-gpu
 module load Julia/1.9.3-CrayGNU-21.09-cuda
 
-srun julia -O3 3D_maxwell_pml_xPU
+srun julia -O3 3D_maxwell_pml_xPU.jl

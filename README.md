@@ -474,14 +474,27 @@ The mathematical formulation of the previous subsection can be translated into c
 The structure of the code is similar to the one of the 2D code.
 
 TODO: results
+ALPHA =0.0
 
-|![](./docs/Ex_field_3D-v1.png)|![](./docs/Ey_field_3D-v1.png)|![](./docs/Ez_field_3D-v1.png)|
+SURFACES
+
+|![](./docs/3D/Ex_3D_pml_nx_256_ny_256_nz_100_alpha_0.0.png)|![](./docs/3D/Ey_3D_pml_nx_256_ny_256_nz_100_alpha_0.0.png)|![](./docs/3D/Ez_3D_pml_nx_256_ny_256_nz_100_alpha_0.0.png)|
 |:--:| :--: | :--: |
 | *Ex field at nz/2*| *Ey field at nz/2* | *Ez field at nz/2* |
 
-|![](./docs/Hx_field_3D-v1.png)|![](./docs/Hy_field_3D-v1.png)|![](./docs/Hz_field_3D-v1.png)|
+|![](./docs/3D/Hx_3D_pml_nx_256_ny_256_nz_100_alpha_0.0.png)|![](./docs/3D/Hy_3D_pml_nx_256_ny_256_nz_100_alpha_0.0.png)|![](./docs/3D/Hz_3D_pml_nx_256_ny_256_nz_100_alpha_0.0.png)|
 |:--:| :--: | :--: |
 | *Hx field at nz/2*| *Hy field at nz/2* | *Hz field at nz/2-1* |
+
+ANIMATIONS
+
+|![](./docs/3D/Ex_3D_pml_nx_256_ny_256_nz_100_alpha_0.0.gif)|![](./docs/3D/Ey_3D_pml_nx_256_ny_256_nz_100_alpha_0.0.gif)|![](./docs/3D/Ez_3D_pml_nx_256_ny_256_nz_100_alpha_0.0.gif)|
+|:--:| :--: | :--: |
+| *Ex field*| *Ey field* | *Ez field* |
+
+|![](./docs/3D/Hx_3D_pml_nx_256_ny_256_nz_100_alpha_0.0.gif)|![](./docs/3D/Hy_3D_pml_nx_256_ny_256_nz_100_alpha_0.0.gif)|![](./docs/3D/Hz_3D_pml_nx_256_ny_256_nz_100_alpha_0.0.gif)|
+|:--:| :--: | :--: |
+| *Hx field*| *Hy field* | *Hz field*|
 
 ## Testing
 
