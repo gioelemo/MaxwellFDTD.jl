@@ -284,3 +284,4 @@ end
 # Function used for the simulations in README.md
 #maxwell(256, 256, 100, 15000, 0.0, do_visu=true, do_test=false)
 #maxwell(256, 256, 100, 15000, 0.1, do_visu=true, do_test=false)
+#maxwell(256, 256, 100, 15000, 5.0, do_visu=true, do_test=false)
