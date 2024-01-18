@@ -221,7 +221,7 @@ location = 30.0  # location of Gaussian pulse
 After running the code with 
 `sbatch run_1D_maxwell_lossy_layer_xPU.sh` (works for both CPU and GPU by changing the `USE_GPU` flag in the [1D_maxwell_additive_source_lossy_layer.jl](./scripts/1D_maxwell_additive_source_lossy_layer.jl) file.) we get the following animation for the $E_z$ field
 
-|![](./docs/Maxwell_1D_xpu_exp.gif)|
+|![](./docs/1D/Maxwell_1D_xpu_exp.gif)|
 |:--:| 
 | *Maxwell FDTD 1D simulation nx=200, nt=450 - Ez field, exp source* |
 
@@ -249,7 +249,7 @@ location = 0.0   # location of Gaussian pulse
 After running the code with 
 `sbatch run_1D_maxwell_lossy_layer_xPU.sh` (works for both CPU and GPU by changing the `USE_GPU` flag in the [1D_maxwell_additive_source_lossy_layer.jl](./scripts/1D_maxwell_additive_source_lossy_layer.jl) file.) we get the following animation for the $E_z$ field
 
-|![](./docs/Maxwell_1D_xpu_sin.gif)|
+|![](./docs/1D/Maxwell_1D_xpu_sin.gif)|
 |:--:|
 | *Maxwell FDTD 1D simulation nx=200, nt=450 - Ez field, sin source* |
 
@@ -350,7 +350,7 @@ We test the code with different values of $\text{pml alpha}$
 
 The resulting animation is given as:
 
-|![](./docs/Maxwell_2D_xpu_alpha=000.gif)|
+|![](./docs/2D/Maxwell_2D_xpu_alpha=000.gif)|
 |:--:|
 | *Maxwell FDTD 2D simulation nx=255, ny=256, nt=15000, nvis=100, alpha=0.0 - Hz field*|
 
@@ -362,7 +362,7 @@ In this case we observe that no waves are absorbed by the PML since the value of
 
 The resulting animation is given as:
 
-|![](./docs/Maxwell_2D_xpu_alpha=010.gif)|
+|![](./docs/2D/Maxwell_2D_xpu_alpha=010.gif)|
 |:--:|
 | *Maxwell FDTD 2D simulation nx=255, ny=256, nt=15000, nvis=100, alpha=0.1 - Hz field*|
 
@@ -372,7 +372,7 @@ Different as the previous case we observe that some waves are partially absorbed
 
 The resulting animation is given as:
 
-|![](./docs/Maxwell_2D_xpu_alpha=500.gif)|
+|![](./docs/2D/Maxwell_2D_xpu_alpha=500.gif)|
 |:--:|
 | *Maxwell FDTD 2D simulation nx=255, ny=256, nt=15000, nvis=100, alpha=5.0 - Hz field*|
 
