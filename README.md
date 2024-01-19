@@ -347,7 +347,7 @@ nvis = 100             # visualisation interval
 
 We test the code with different values of $\text{pml alpha}$ and we use a Gaussian initialisation for the $H_z$ field.
 
-For each of the following tests we generate an animation with the [make_animation_2D.bash](./docs/make_animation_2D.bash).
+For each of the following tests we generate an animation with the [make_animation_2D.bash](./docs/make_animation_2D.bash) file.
 
 1. $\text{pml alpha}=0.0$ (i.e. no PML boundary)
 
