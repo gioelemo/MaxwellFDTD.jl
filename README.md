@@ -379,7 +379,7 @@ The resulting animation is given as:
 |:--:|
 | *Maxwell FDTD 2D simulation nx=255, ny=256, nt=15000, nvis=100, alpha=5.0 - Hz field*|
 
-Similar to the previous case we observe that some waves are partially absorbed by the PML because we use a value of $\text{pml alpha}=5.0$. The absorbtion is a bit big compared to the previous case, but it is very difficult to see from this animation.
+Similar to the previous case we observe that some waves are partially absorbed by the PML because we use a value of $\text{pml alpha}=5.0$. The absorption is somewhat larger compared to the previous case, but it is challenging to discern in this animation.
 
 
 ## 3D FDTD
