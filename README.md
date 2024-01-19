@@ -220,7 +220,7 @@ location = 30.0              # location of Gaussian pulse
 ```
 
 After running the code with 
-`sbatch run_1D_maxwell_lossy_layer_xPU.sh` (works for both CPU and GPU by changing the `USE_GPU` flag in the [1D_maxwell_additive_source_lossy_layer.jl](./scripts/1D_maxwell_additive_source_lossy_layer.jl) file.) we get the following animation for the $E_z$ field
+`sbatch run_1D_maxwell_lossy_layer_xPU.sh` (works for both CPU and GPU by changing the `USE_GPU` flag in the [1D_maxwell_additive_source_lossy_layer.jl](./scripts/1D_maxwell_additive_source_lossy_layer.jl) file.) we get the following animation for the $E_z$ field (using the file [make_animation_1D.bash](./docs/make_animation_1D.bash)):
 
 |![](./docs/1D/Maxwell_1D_xpu_exp.gif)|
 |:--:| 
@@ -248,7 +248,7 @@ location = 0.0             # location of Gaussian pulse
 ```
 
 After running the code with 
-`sbatch run_1D_maxwell_lossy_layer_xPU.sh` (works for both CPU and GPU by changing the `USE_GPU` flag in the [1D_maxwell_additive_source_lossy_layer.jl](./scripts/1D_maxwell_additive_source_lossy_layer.jl) file.) we get the following animation for the $E_z$ field:
+`sbatch run_1D_maxwell_lossy_layer_xPU.sh` (works for both CPU and GPU by changing the `USE_GPU` flag in the [1D_maxwell_additive_source_lossy_layer.jl](./scripts/1D_maxwell_additive_source_lossy_layer.jl) file.) we get the following animation for the $E_z$ field (using the file [make_animation_1D.bash](./docs/make_animation_1D.bash)):
 
 |![](./docs/1D/Maxwell_1D_xpu_sin.gif)|
 |:--:|
@@ -346,6 +346,8 @@ nvis = 100             # visualisation interval
 ```
 
 We test the code with different values of $\text{pml alpha}$ and we use a Gaussian initialisation for the $H_z$ field.
+
+For each of the following tests we generate an animation with the [make_animation_2D.bash](./docs/make_animation_2D.bash).
 
 1. $\text{pml alpha}=0.0$ (i.e. no PML boundary)
 
