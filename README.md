@@ -466,7 +466,7 @@ $$
 (applied to the first and last $\text{pml width}$ rows of $E_z$).
 
 where:
-- $\text{pml width}$: is the width of the extension of the domain in $x$ and $y$ direction.
+- $\text{pml width}$: is the width of the extension of the domain in $x, y$ and $z$ directions.
 - $\text{pml alpha}$: is the factor which control the effect of the PML boundary.
 
 
