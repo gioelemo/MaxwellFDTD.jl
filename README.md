@@ -422,13 +422,13 @@ $$
 4. For $H_x$ (Magnetic field in $x$-direction from Equation (13))
 
 $$
-H_x +=  \frac{\Delta t}{\mu}\left(-\sigma \cdot H_z + \frac{\partial E_y}{\partial z} - \frac{\partial E_z}{\partial y}\right)
+H_x +=  \frac{\Delta t}{\mu}\left(-\sigma \cdot H_x + \frac{\partial E_y}{\partial z} - \frac{\partial E_z}{\partial y}\right)
 $$
 
 5. For $H_y$ (Magnetic field in $y$-direction from Equation (14))
 
 $$
-H_y +=  \frac{\Delta t}{\mu}\left(-\sigma \cdot H_z + \frac{\partial E_z}{\partial x} - \frac{\partial E_x}{\partial z}\right)
+H_y +=  \frac{\Delta t}{\mu}\left(-\sigma \cdot H_y + \frac{\partial E_z}{\partial x} - \frac{\partial E_x}{\partial z}\right)
 $$
 
 6. For $H_z$ (Magnetic field in $z$-direction from Equation (15))
